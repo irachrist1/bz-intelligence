@@ -10,11 +10,12 @@ A comprehensive Business Intelligence & Compliance Ecosystem for Rwanda — an A
 
 | Document | Description |
 |----------|-------------|
+| **[STATUS.md](./STATUS.md)** | **← Start here. Current build state, what works, what's broken, immediate next steps.** |
+| [ROADMAP.md](./ROADMAP.md) | Phased implementation plan — updated to reflect actual progress |
 | [MANIFESTO.md](./MANIFESTO.md) | Vision, mission, values, hard questions answered, personas |
 | [PRODUCT.md](./PRODUCT.md) | Product modes, feature list, user journeys, pricing model |
 | [ARCHITECTURE.md](./ARCHITECTURE.md) | Technical architecture, RAG system, database schema, security |
-| [TECHSTACK.md](./TECHSTACK.md) | Tech stack with full reasoning for every decision |
-| [ROADMAP.md](./ROADMAP.md) | Phased implementation plan with KPIs |
+| [TECHSTACK.md](./TECHSTACK.md) | Tech stack with full reasoning for every decision (includes what's actually installed vs planned) |
 | [DATA_STRATEGY.md](./DATA_STRATEGY.md) | Data sources, quality process, the data moat |
 
 ---
@@ -31,20 +32,22 @@ Both modes draw from the same verified knowledge base.
 
 ---
 
-## Stack Summary
+## Actual Stack (as built, March 2026)
 
-- **Frontend:** Next.js 14 + TypeScript + Tailwind + shadcn/ui
+- **Frontend:** Next.js 16 + TypeScript + Tailwind + shadcn/ui
 - **Database:** Neon (serverless PostgreSQL + pgvector) + Drizzle ORM
-- **Auth:** Better Auth (open-source, self-hosted)
-- **Storage:** Cloudflare R2 (zero egress fees)
-- **AI:** Anthropic Claude API (claude-sonnet-4-6) + Vercel AI SDK
-- **Embeddings:** OpenAI text-embedding-3-small
-- **Pipeline:** Python (pdfplumber, BeautifulSoup, Celery, asyncpg) on Railway
-- **Deployment:** Vercel + Railway
+- **Auth:** Better Auth (open-source, self-hosted, email/password working)
+- **Storage:** Cloudflare R2 — deferred to Phase 3
+- **AI:** Anthropic Claude (claude-sonnet-4-6) + Vercel AI SDK v6 — wired but API key invalid
+- **Embeddings:** Voyage AI voyage-3 (1024 dims) — replaces OpenAI, 200M free tokens
+- **Pipeline:** Python — not yet started (Phase 2)
+- **Deployment:** Local only — not yet on Vercel
 
 ---
 
 ## Start Here
 
-Read [MANIFESTO.md](./MANIFESTO.md) to understand what we're building and why.
-Then [ROADMAP.md](./ROADMAP.md) to understand what to build first.
+New to this codebase? Read **[STATUS.md](./STATUS.md)** first — it tells you exactly what works, what's broken, and what to do next.
+
+Then [MANIFESTO.md](./MANIFESTO.md) to understand what we're building and why.
+Then [ROADMAP.md](./ROADMAP.md) for the phased implementation plan.

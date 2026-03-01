@@ -1,297 +1,376 @@
 # BZ Intelligence — Implementation Roadmap
 
+> For current build status, see STATUS.md first.
+
 ---
 
-## Guiding Principles for This Roadmap
+## Guiding Principles
 
-1. **Compliance Mode first, Intelligence Mode second.** Compliance has a clearer pain point, a more urgent use case, and is easier to monetize early. Intelligence Hub is more aspirational and requires more data — build it once the compliance foundation validates the product.
-
-2. **Data before features.** A compliance feature with bad data is worse than no feature — it could actively harm users. Every phase starts with data validation.
-
-3. **Narrow and deep > wide and shallow.** At launch, we serve 2–3 sectors extremely well rather than 10 sectors poorly. Quality of data and guidance matters more than breadth.
-
-4. **Ship something users can test early.** The MVP does not need a full product — it needs one thing that works reliably and creates genuine value. Get to that one thing fast.
+1. **Compliance Mode first.** More urgent pain point, clearer monetization, smaller scope. Intelligence Hub follows once compliance is validated.
+2. **Data quality is the product.** A wrong compliance answer is worse than no answer. Every document in the knowledge base must be human-reviewed before publication.
+3. **Narrow and deep over wide and shallow.** Three sectors done extremely well beats ten sectors done poorly.
+4. **The perfect is the enemy of the shipped.** Get real users using a limited but reliable product. Expand from there.
 
 ---
 
 ## Phase Overview
 
-| Phase | Name | Duration | Primary Outcome |
-|-------|------|----------|-----------------|
-| 0 | Foundation | 3–4 weeks | Infrastructure up, data pipeline running, first data in DB |
-| 1 | Compliance MVP | 6–8 weeks | Working compliance roadmap for 3 sectors, AI chat, beta users |
-| 2 | Intelligence Hub | 8–10 weeks | Company directory, sector dashboards, AI market analyst |
-| 3 | Full Product | 6–8 weeks | Document vault, PDF reports, full feature parity |
-| 4 | Growth | Ongoing | Partnerships, API, expansion, monetization |
+| Phase | Name | Status | Primary Outcome |
+|-------|------|--------|-----------------|
+| 0 | Foundation | ✅ Done (partial) | Infrastructure, DB, basic app shell |
+| 1 | Compliance MVP | 🔄 In progress | Working compliance product for 3 sectors |
+| 2 | Intelligence Hub | ⬜ Not started | Company directory, sector dashboards, market AI |
+| 3 | Full Product | ⬜ Not started | Document vault, PDF reports, automation |
+| 4 | Growth | ⬜ Not started | API, partnerships, geographic expansion |
 
 ---
 
-## Phase 0: Foundation (Weeks 1–4)
+## Phase 0: Foundation — ✅ Complete (with caveats)
 
-**Goal:** Everything is set up. No features exist yet, but the infrastructure is solid and data is flowing.
+**What was built:**
+- [x] Next.js 16 + TypeScript + Tailwind + shadcn/ui
+- [x] Neon database provisioned (Neon project: `bz-intelligence`, region: us-west-2)
+- [x] pgvector extension enabled
+- [x] Full Drizzle ORM schema (public + private + auth tables)
+- [x] Better Auth configured (email/password; Google OAuth not yet active)
+- [x] All tables created via `drizzle-kit push`
+- [x] Seed data: 8 regulatory bodies, 9 compliance steps
+- [x] App shell: landing page, sign-up, sign-in, dashboard layout, sidebar
+- [x] Route protection (proxy.ts — Next.js 16 renamed middleware)
+- [x] RAG search function (Voyage AI embeddings + pgvector)
+- [x] AI chat API route (streaming, tool-calling)
+- [x] System prompts for both modes
+- [x] Basic Compliance pages: roadmap, chat, documents (stub), newsfeed
+- [x] Basic Intelligence pages: directory (empty), chat
+- [x] Onboarding questionnaire → business profile saved to DB
+- [x] Compliance history (step status tracking)
+- [x] Vercel AI SDK v6 migration (breaking changes handled)
 
-### 0.1 Infrastructure Setup (Week 1)
-- [ ] Initialize Next.js 14 project with TypeScript, Tailwind, shadcn/ui
-- [ ] Set up Supabase project (local + production)
-- [ ] Configure Supabase Auth (email + Google OAuth)
-- [ ] Initialize Supabase Storage (buckets: `user-documents`, `report-exports`, `company-assets`)
-- [ ] Configure Row Level Security policies for all private tables
-- [ ] Set up Vercel project, connect to GitHub for auto-deploys
-- [ ] Set up Sentry for error tracking
-- [ ] Configure environment variables for all services
-- [ ] Create basic project structure:
-  ```
-  /app            - Next.js App Router pages
-  /components     - React components
-  /lib            - Utilities, Supabase client, AI config
-  /pipeline       - Python data pipeline (separate directory)
-  /supabase       - Migrations, seed data, RLS policies
-  ```
+**What was intentionally skipped:**
+- [ ] Cloudflare R2 — not needed until document vault (Phase 3)
+- [ ] Stripe — not needed until paid tiers are ready
+- [ ] Python data pipeline — separate project, not yet started
+- [ ] Knowledge base content — no documents ingested yet
+- [ ] Company data — no companies seeded
+- [ ] Sentry error monitoring
 
-### 0.2 Database Schema (Week 1–2)
-- [ ] Write and run migrations for all core tables (see ARCHITECTURE.md schema)
-- [ ] Enable pgvector extension
-- [ ] Create knowledge_embeddings table with IVFFlat index
-- [ ] Set up all RLS policies
-- [ ] Write seed data scripts for regulatory bodies (RDB, BNR, RRA, RURA, RSB, PSF)
-
-### 0.3 Data Pipeline Bootstrap (Week 2–4)
-- [ ] Set up Python pipeline project on Railway
-- [ ] Build PDF extractor for government publications (BNR circulars, RRA announcements)
-- [ ] Build web scraper for RDB company registry (public data)
-- [ ] Build text chunker (semantic, 512 tokens, 50-token overlap)
-- [ ] Build embedding pipeline (OpenAI API → pgvector insert)
-- [ ] Initial data load: manually curate first 50 companies across 3 sectors (Fintech, Agritech, ICT)
-- [ ] Initial data load: ingest core compliance documents from BNR, RRA, RDB
-
-### 0.4 Initial Compliance Knowledge Base (Week 3–4)
-The most critical Phase 0 deliverable. Before writing any compliance feature code, the knowledge base must exist.
-
-**Priority sectors for launch:**
-1. **Fintech** (Digital Lending, Mobile Money, Payment Services) — most complex, highest demand
-2. **General Business / SME** (all sectors: basic registration, tax, employment law)
-3. **Technology / ICT** (software companies, IT services)
-
-**Required documents to ingest:**
-- [ ] RDB: Company registration guide, BPN process, foreign company branch registration
-- [ ] RRA: TIN registration process, VAT registration thresholds, eTax setup guide, PAYE requirements
-- [ ] BNR: PSP licensing framework, microfinance regulations, digital lending guidelines
-- [ ] RURA: ICT sector licensing requirements
-- [ ] Rwanda Labor Law summary: employment contracts, RSSB registration
-- [ ] Official Gazette: relevant recent regulatory changes
-
-**Human review gate:** No compliance document enters the knowledge base without human review and sign-off. This is non-negotiable.
-
-### Phase 0 Success Criteria
-- Infrastructure deployed and accessible
-- First 50 companies in database, manually verified
-- Core compliance documents ingested and embedded
-- RAG system returns correct, cited answers to test queries
-- Zero untested data in the compliance knowledge base
+**Known issues remaining from Phase 0:**
+- Anthropic API key invalid (Claude Code OAuth token rejected by Anthropic API)
+- Google OAuth not configured (credentials missing)
+- No theme system (always light mode)
+- Onboarding too shallow (4 questions, needs ~10)
+- Rate limiting not wired up despite Upstash being configured
 
 ---
 
-## Phase 1: Compliance MVP (Weeks 5–12)
+## Phase 1: Compliance MVP — 🔄 In Progress
 
-**Goal:** A working compliance product that real users can use. Limited to 3 sectors, but everything within those sectors should be accurate and useful.
+**Goal:** A working compliance product that a real Rwanda founder could use with confidence. Limited to 3 sectors (Fintech, General SME, ICT/Tech), but everything within those sectors must be accurate and cited.
 
-### 1.1 Authentication & Onboarding (Week 5–6)
-- [ ] Sign up / sign in flow (Supabase Auth)
-- [ ] Mode selection: "I want to understand the market" vs "I want to navigate compliance"
-- [ ] Business DNA questionnaire (Compliance Mode entry)
-  - Business type (Ltd, Sole Proprietorship, NGO, Branch)
-  - Sector selection (3 sectors at launch)
-  - Customer type (B2B, B2C, both)
-  - Special flags (financial transactions, foreign ownership, data processing)
-  - Current status (idea, registered, operating)
-- [ ] Business Profile stored in Supabase private schema
+### 1.0 Fix Blockers (Do First)
 
-### 1.2 Compliance Roadmap Generator (Week 6–8)
-- [ ] Roadmap generation algorithm: map Business Profile → applicable compliance_steps
-- [ ] Ordered step list with prerequisites enforced
-- [ ] Each step card shows:
-  - What it is (plain language)
-  - Regulatory body
-  - Documents required
-  - Cost and timeline
-  - Application link
-  - Status (pending / in-progress / completed)
-- [ ] User can mark steps as completed
-- [ ] Compliance health score (% of required steps completed)
-- [ ] Deadline tracking (for steps with time requirements)
+- [ ] **API key** — Get a valid Anthropic API key from console.anthropic.com. This is the single blocker for all AI functionality.
+- [ ] **Remove Google OAuth warning** — Either add credentials or conditionally remove the provider from `lib/auth/index.ts` to silence the constant warning.
+- [ ] **Theme system** — Implement system-default dark/light + manual toggle. See 1.3 below.
 
-### 1.3 AI Compliance Chat (Week 8–10)
-- [ ] Chat interface with streaming responses (Vercel AI SDK)
-- [ ] RAG pipeline integrated: query → embed → vector search → LLM call
-- [ ] Business Profile injected into every compliance query
-- [ ] Citation panel showing source for every claim
-- [ ] "I don't have data on this" fallback behavior
-- [ ] Conversation history (session-level)
-- [ ] Rate limiting per tier (Free: 10 queries/month)
+### 1.1 Rebuild Onboarding as a Conversation
 
-### 1.4 Regulatory Newsfeed (Week 10–11)
-- [ ] Manually curated feed of recent regulatory changes (starting point)
-- [ ] Items tagged by sector
-- [ ] User sees only items relevant to their sector
-- [ ] Plain-language summary for each item (AI-generated, human-reviewed)
-- [ ] Link to original source
+The current 4-question form is not enough context to generate a genuinely personalized roadmap. The redesign should feel like talking to an advisor, not filling in a form.
 
-### 1.5 Beta Access & Feedback Loop (Week 11–12)
-- [ ] Invite 20–50 beta users (mix of founders, researchers, advisors)
-- [ ] In-app feedback widget on every response: "Was this helpful? Was this accurate?"
-- [ ] Track: which queries return "I don't have data" (knowledge base gaps)
-- [ ] Track: which steps users complete (engagement signal)
-- [ ] Weekly review of AI responses for accuracy issues
+**Two implementation options:**
+
+**Option A — Smart multi-step form (simpler)**
+A step-by-step wizard with intelligent branching. Answer "fintech" and the next question becomes about fintech-specific sub-sectors. Answer "foreign investors: yes" and foreign ownership questions appear. Maximum 10 questions, shown conditionally based on prior answers. No question shown if it doesn't apply.
+
+**Option B — AI chat onboarding (ideal)**
+The user types naturally: "I'm starting a digital lending startup in Kigali." The AI responds with follow-up questions, extracts the business profile from the conversation, and shows a structured summary at the end for the user to confirm. This is more engaging and produces richer profiles.
+
+**Recommended questions (for either option):**
+1. Describe your business in a sentence or two *(free text)*
+2. Legal structure — Ltd company, Sole proprietorship, NGO/Association, or Branch of foreign company?
+3. Where are you in your journey? — Pre-registration idea / Registered but not yet operating / Currently operating
+4. Who are your customers? — Individual consumers (B2C) / Other businesses (B2B) / Government (B2G) / Mix
+5. Does your business handle money? — Payments, lending, savings deposits, insurance, investment *(yes = BNR requirements)*
+6. Will you have foreign shareholders or directors? *(yes = additional RDB + forex requirements)*
+7. Will you collect personal data about customers or employees? *(yes = data protection requirements)*
+8. How many employees in year one? — Just me / 2–10 / 11–50 / 50+
+9. Where will you operate? — Kigali only / Kigali + provincial / Nationwide / Cross-border (EAC)
+10. What's your most urgent compliance question right now? *(seeds first AI conversation)*
+
+**Implementation note:** Upgrade the `business_profiles` table to store answers to questions 5–9 (foreign ownership boolean, handles_money boolean, collects_data boolean, employee_range, operates_province boolean). These are compliance trigger flags that make the roadmap personalization much more accurate.
+
+### 1.2 Improve Compliance Roadmap Engine
+
+Currently, the roadmap filters steps by sector and biz_type. This needs to be smarter:
+- [ ] Filter steps by `handles_money` flag (BNR steps should only appear for fintech/financial businesses)
+- [ ] Filter by `foreign_ownership` (additional RDB reporting, National Bank forex requirements)
+- [ ] Filter by `collects_data` (data protection steps)
+- [ ] Filter by employee count (RSSB mandatory above certain thresholds)
+- [ ] Show prerequisite dependencies between steps (visually, not just in order)
+- [ ] Show estimated total cost and timeline for completing the roadmap
+
+### 1.3 Theme System
+
+The app should respect the user's OS settings and allow manual override.
+
+**Implementation:**
+- Add `next-themes` package
+- Wrap the root layout in `ThemeProvider`
+- Add a toggle button (sun/moon icon) to the top-right of the dashboard header
+- System default on first load; preference persisted in localStorage
+- Test in both light and dark to ensure all shadcn/ui components look correct
+
+### 1.4 Fix Google Auth Button
+
+- Add the Google logo SVG to the sign-in and sign-up pages
+- Either configure Google OAuth credentials or remove the button entirely until they're added
+- Getting Google OAuth credentials: Google Cloud Console → Create OAuth 2.0 Client → Authorized redirect URI: `http://localhost:3000/api/auth/callback/google`
+
+### 1.5 Seed the Knowledge Base
+
+This is the most important Phase 1 deliverable. The AI is useless without content.
+
+**Minimum viable knowledge base for testing (manually curated):**
+- [ ] RDB: Company registration guide (public PDF from rdb.rw)
+- [ ] RDB: Steps to register a Private Limited Company
+- [ ] RRA: TIN registration process
+- [ ] RRA: VAT registration thresholds and requirements
+- [ ] BNR: Overview of PSP (Payment Service Provider) licensing
+- [ ] BNR: Digital lending guidelines
+- [ ] RURA: ICT licensing overview
+- [ ] RSSB: Employer registration requirements
+- [ ] Rwanda Labour Law summary: employment contracts, probation, termination
+- [ ] Official Gazette: summary of most recent relevant regulatory changes
+
+**Ingestion process (manual, pre-pipeline):**
+1. Download/copy the document text
+2. Chunk into ~300-word segments with 50-word overlap
+3. Run through the embedding function (`voyage-3` model)
+4. Insert into `knowledge_embeddings` with correct `sector_tags`, `doc_type`, `reg_body`, `source_title`, `source_url`
+
+A simple Node.js ingestion script in `scripts/ingest-document.ts` should be written for this. It is much faster than doing it manually per row.
+
+### 1.6 Compliance Chat — Make It Actually Work
+
+Once the API key is fixed and knowledge base has content:
+- [ ] Test the full RAG loop: question → embed → pgvector search → tool result → LLM answer
+- [ ] Verify citations render correctly in the chat UI
+- [ ] Test "no results found" graceful handling
+- [ ] Verify the business profile is being injected into the system prompt
+- [ ] Add the "This is not legal advice" disclaimer to every response
+
+### 1.7 Beta Access Setup
+
+- [ ] Set up a waitlist or invite-only flow
+- [ ] Add in-app feedback widget on chat responses (👍 👎 + optional text)
+- [ ] Track: queries that return "no relevant documents found" (knowledge base gap signals)
+- [ ] Set up email notifications with Resend (welcome email on sign-up)
 
 ### Phase 1 Success Criteria
-- 50 active beta users
-- Net Promoter Score (NPS) > 40 from beta users
-- AI compliance chat accuracy rate > 85% (reviewed by legal advisor)
-- Zero documented cases of harmful inaccurate compliance guidance
-- Knowledge base gaps identified and backlog created
+- AI compliance chat returns accurate, cited answers for at least 80% of test queries
+- 3 sectors fully covered in knowledge base
+- 20 real Rwanda founders have used the product
+- Zero documented cases of materially wrong compliance guidance
 
 ---
 
-## Phase 2: Intelligence Hub (Weeks 13–22)
+## Phase 2: Intelligence Hub
 
-**Goal:** Launch the market intelligence product. The company directory and sector dashboards become the top-of-funnel product while compliance remains the core value driver.
+**Goal:** Launch the market intelligence product. Company directory and sector dashboards become the top-of-funnel (free) product, while compliance remains the core revenue driver.
 
-### 2.1 Company Directory (Week 13–15)
-- [ ] Company listing page with all filters (sector, stage, size, region, funding status)
-- [ ] Search (Supabase full-text search across company names and descriptions)
-- [ ] Company profile page (all fields from schema)
-- [ ] "Last verified" dates visible on all data
-- [ ] Data source attribution
-- [ ] Free tier: limited to 20 results per search, basic fields only
-- [ ] Pro tier: unlimited results, all fields, export to CSV
+**Do not start Phase 2 until:**
+- Phase 1 compliance chat is working accurately
+- At least 20 active compliance users
+- Knowledge base covers 3 sectors with verified content
 
-### 2.2 Sector Intelligence Dashboards (Week 15–18)
-- [ ] Dashboard page per sector (starting with 3)
-- [ ] Metrics: company count, funding totals, recent rounds, sector growth signals
-- [ ] Company breakdown by sub-sector (Recharts pie/bar charts)
-- [ ] Key players table (top 5 by funding / employee count)
-- [ ] Regulatory landscape summary (AI-generated from knowledge base)
-- [ ] Recent news section (from newsfeed, sector-filtered)
-- [ ] "White space" indicator (sub-sectors with few or no players)
+### 2.1 Company Directory
 
-### 2.3 AI Market Analyst (Week 17–20)
-- [ ] Chat interface for intelligence queries (separate from Compliance Chat)
-- [ ] Grounded in public knowledge base only (not user's private context)
-- [ ] Handles queries like:
-  - "List all fintech companies in Rwanda with a BNR license"
-  - "Who are the investors active in Rwanda's agritech sector?"
-  - "What sub-sectors of fintech are underserved?"
-- [ ] Citation panel same as Compliance Chat
+The Intelligence Hub needs data before it has UI. Bootstrap the company directory before building the pages.
 
-### 2.4 Expand Knowledge Base (Ongoing through Phase 2)
-- [ ] Grow company directory to 200+ verified companies
-- [ ] Add 2 additional sectors (Health, Energy)
-- [ ] Automate government publication monitoring (daily checks for new PDFs)
-- [ ] Implement data freshness alerts (flag stale records for re-verification)
+**Data strategy:**
+- Start with 50 manually verified companies across 3 sectors (Fintech, Agritech, ICT)
+- Source: RDB public registry, company websites, PSF member directory
+- Each company needs: name, sector, description, website, founding year, employee range, known licenses
+- Data must be verified against primary sources before publication
+
+**Directory features:**
+- [ ] Search by name, sector, location, stage
+- [ ] Filter panel (sector, biz type, employee range, funded/bootstrapped)
+- [ ] Company profile pages (individual pages per company)
+- [ ] "Last verified" date visible on all data
+- [ ] Data source attribution on each field
+- [ ] Free tier: 20 results/search, core fields only
+- [ ] Pro tier: unlimited results, all fields, CSV export
+
+### 2.2 Sector Intelligence Dashboards
+
+One dashboard per sector showing:
+- Company count and growth over time
+- Sub-sector breakdown (Recharts pie chart)
+- Funding totals and recent rounds
+- Key players (top 5 by funding or employee count)
+- Regulatory landscape summary (AI-generated from knowledge base)
+- Recent relevant news
+
+### 2.3 AI Market Analyst
+
+Same RAG architecture as compliance chat, but grounded in public company and market data rather than regulatory documents:
+- "List all fintech companies with a BNR Payment Service Provider license"
+- "Who are the active investors in Rwanda's agritech sector?"
+- "What sub-sectors of ICT are underserved in Rwanda?"
+- "Compare Irembo's product scope to similar GovTech companies in the region"
+
+### 2.4 Data Pipeline (Python — Separate Project)
+
+Before Phase 2 can scale beyond manually entered data, the Python data pipeline must be built:
+- [ ] Set up Railway project for the pipeline service
+- [ ] Build PDF extractor for government publications (BNR circulars, RRA notices)
+- [ ] Build web scraper for RDB company registry (public data only)
+- [ ] Build text chunker and embedding pipeline
+- [ ] Automated monitoring: detect new government publications daily
+- [ ] Human review queue before any regulatory content is published
 
 ### Phase 2 Success Criteria
-- 500 total registered users (free + paid)
-- 50+ paying subscribers
 - Company directory: 200+ verified companies
-- Sector dashboards: 5 sectors live
-- < 5% of company data complaints about inaccuracy
+- Sector dashboards: 3 sectors live with real data
+- AI market analyst answers 5 benchmark test queries accurately
+- 500 registered users total
+- 50+ paying subscribers
 
 ---
 
-## Phase 3: Full Product (Weeks 23–32)
+## Phase 3: Full Product
 
-**Goal:** Complete the feature set. Document vault, PDF reports, automated newsfeed, competitive benchmarking.
+### 3.1 Document Vault
+- File upload (drag and drop, PDF/JPG/PNG)
+- Cloudflare R2 storage with org-scoped paths
+- AI document analysis: extract document type, dates, license numbers, expiry
+- Map uploaded documents to compliance steps they fulfill
+- Expiry alerts (email 60 days before expiry)
 
-### 3.1 Document Vault (Week 23–25)
-- [ ] Document upload UI (drag and drop, multiple file types)
-- [ ] Supabase Storage integration with encryption
-- [ ] AI document categorization (what type of document is this?)
-- [ ] Key data extraction (expiry dates, license numbers, registration dates)
-- [ ] Compliance step mapping (which roadmap step does this fulfill?)
-- [ ] Expiry alerts (notify user 60 days before any document expires)
+### 3.2 PDF Report Export
+- Templates: Compliance Summary, Sector Analysis, Competitive Landscape
+- HTML/CSS report templates rendered by Puppeteer on Railway
+- Stored in R2, delivered via signed URL (1 hour expiry)
+- Available on Pro tier (5/month) and Team tier (unlimited)
 
-### 3.2 PDF Report Export (Week 25–28)
-- [ ] Report templates: Sector Analysis, Competitive Landscape, Compliance Summary
-- [ ] Report generator: AI synthesis → structured data → Puppeteer render → PDF
-- [ ] Professional layout with BZ Intelligence branding
-- [ ] Available on Pro tier (5 reports/month) and Team tier (unlimited)
+### 3.3 Competitor Benchmarking
+- Select a company as reference point
+- System identifies comparable companies in the directory
+- Side-by-side comparison table
+- AI-generated market position analysis and gap identification
 
-### 3.3 Competitor Benchmarking Matrix (Week 27–30)
-- [ ] Select a company or business model as the reference point
-- [ ] System identifies comparable companies
-- [ ] Side-by-side comparison table (size, products, funding, licenses, geography)
-- [ ] AI-generated "market position" summary
-- [ ] Gap analysis: where the user could differentiate
+### 3.4 Automated Newsfeed
+- Automated ingestion from government RSS feeds and monitored URLs
+- AI-generated plain-language summaries (human review for regulatory items)
+- Weekly email digest (opt-in, sector-filtered)
+- Impact assessment: "How does this regulatory change affect your business?"
 
-### 3.4 Automated Newsfeed (Week 29–31)
-- [ ] Automated ingestion from government RSS feeds and monitored URLs
-- [ ] AI-generated plain-language summaries (human review for regulatory items)
-- [ ] User email digest (weekly, opt-in)
-- [ ] Impact assessment: "How does this change affect your business?"
-
-### 3.5 Company Profile Claiming (Week 31–32)
-- [ ] Companies can claim their profile
-- [ ] Verified company badge
-- [ ] Self-reported data layer (clearly labeled as such)
-- [ ] Editorial review before changes go live
-
-### Phase 3 Success Criteria
-- 1,000 registered users
-- 150+ paying subscribers
-- 3 Enterprise customers signed
-- PDF report feature being used by > 30% of Pro users
-- Document vault being used by > 50% of compliance mode users
+### 3.5 Company Profile Claiming
+- Verified companies can claim and update their profile
+- "Claimed" badge distinguishes self-reported from independently verified data
+- Editorial review before changes go live
 
 ---
 
-## Phase 4: Growth (Ongoing from Month 8+)
+## Phase 4: Growth (Month 8+)
+
+### API Product
+- Public API for company directory data and compliance roadmap generation
+- Metered billing via Stripe
+- Target customers: law firms, accelerators, government agencies, DFIs
 
 ### Data Partnerships
-- [ ] Formal data sharing agreement with RDB (access to company registry API)
-- [ ] Partnership with BNR for regulatory update feeds
-- [ ] Integration with PSF (Private Sector Federation) membership data
-- [ ] Academic partnerships for research data sharing
-
-### API Product (Enterprise)
-- [ ] Public API for company directory data
-- [ ] API for compliance roadmap generation (for third-party apps)
-- [ ] Rate-limited, metered billing via Stripe
-- [ ] API documentation site
-- [ ] Target customers: law firms, accelerators, government agencies, DFIs
+- Formal data sharing with RDB (registry API access)
+- BNR regulatory update feeds
+- PSF member data integration
 
 ### Geographic Expansion
-- [ ] Market: Uganda (similar regulatory structure, EAC integration)
-- [ ] Market: Kenya (larger market, more complex but higher demand)
-- [ ] Framework: Build expansion as sector/region modules on the same platform
+- Uganda (similar regulatory structure, EAC integration)
+- Kenya (larger market, higher complexity)
+- Framework: region/sector as modular overlays on the same platform
 
 ### White-Label
-- [ ] Compliance module white-labeled for: law firms, business associations, accelerators
-- [ ] They brand it, we power it, they pay a platform fee
-
-### Monetization Optimization
-- [ ] Introduce usage-based pricing for API (per query)
-- [ ] Annual subscription discount (20%)
-- [ ] Referral program for Pro users
+- Compliance module licensed to law firms, business associations, accelerators
+- They brand it; we power it
 
 ---
 
-## Cross-Cutting Concerns (All Phases)
+## Cross-Cutting Non-Negotiables (Every Phase)
 
-### Data Quality Process (Non-Negotiable)
-Every piece of regulatory data goes through:
-1. **Ingestion** — automated pipeline
-2. **Human review** — at least one person verifies against the original source
-3. **Sign-off** — marked as "verified" with date and reviewer ID
-4. **Publication** — enters the knowledge base
-5. **Monitoring** — flagged for re-verification if source document changes
+### Data Quality Gate
+No regulatory content enters the knowledge base without:
+1. Human review against the primary source document
+2. Sign-off from a reviewer
+3. Marked "verified" with date and reviewer name
+4. Scheduled re-verification date (max 90 days)
 
-### Legal Review
-- Quarterly legal review of compliance guidance quality by a Rwanda-admitted attorney
-- Clear disclaimer on every compliance response: "This is informational, not legal advice"
-- Any response that could lead to significant financial or legal consequences flagged for human review
+### Legal Disclaimer
+Every AI compliance response must include: *"This information is for general guidance only and does not constitute legal advice. Consult a qualified Rwanda-admitted attorney for advice specific to your situation."*
 
-### User Trust Metrics (Tracked Every Phase)
-- Accuracy rate (user-flagged errors / total queries)
-- "I don't know" rate (how often AI cannot answer — tracks knowledge base gaps)
-- Compliance step completion rate (engagement signal)
-- Data freshness score (% of knowledge base verified within last 90 days)
+### Accuracy Tracking
+- User can flag any response as inaccurate (single click)
+- Flagged responses trigger human review within 24 hours
+- Track: accuracy rate, "I don't know" rate, most common query types
+- Monthly accuracy review with a legal advisor (at least from Phase 1 beta onward)
+
+---
+
+## Product Backlog — Identified but not yet scheduled
+
+> Items here are confirmed desirable but not yet placed in a phase. Assign to a phase when scoped.
+
+### AI Chat UI Overhaul (Priority: High — assign to Phase 1.8)
+The current chat UI streams text as a wall. Needs a full redesign pass:
+- **Citations as interactive cards** — every AI claim links to the source document with a clickable card showing: source title, reg body, date, relevance snippet. Not buried in text — surfaced as UI elements below the response.
+- **Streaming that looks intentional** — not raw text dumping. Consider showing a "thinking" skeleton before the response starts, then fade-in paragraphs.
+- **Response anatomy** — structure each response into: summary (1–2 sentences), then detail, then sources. The AI should be prompted to output structured sections.
+- **Message actions** — copy response, share, flag as inaccurate (currently 👍/👎 only)
+- **Conversation context** — show a sidebar with conversation topics / question history
+- Design reference: Linear's AI interface, Perplexity's cited answers UI
+
+### Newsfeed Phase 2 — Real-time Rwanda Intelligence (Priority: High — assign to Phase 2.5)
+*Full design in docs/NEWSFEED_DESIGN.md*
+- [ ] Cron job to scrape The New Times, BNL, BNR press releases, RRA announcements, Official Gazette
+- [ ] AI pipeline: article text → relevance classification → impact level → business-profile-aware summary
+- [ ] Article detail page with: AI summary tailored to user's business type + embedded chat ("ask me how this affects you")
+- [ ] "Read" tab: archive of viewed articles, organized by date
+- [ ] Deduplication (same story from multiple sources → one card)
+- [ ] Weekly email digest: top 3–5 items relevant to your sector
+
+### Document Vault (Priority: Medium — Phase 3 confirmed)
+*Full analysis in docs/VAULT_STRATEGY.md*
+- [ ] File upload (Cloudflare R2, org-scoped paths)
+- [ ] AI document parser: extract type, expiry, license number, issuing body
+- [ ] Map uploaded documents to compliance steps ("this satisfies step 6")
+- [ ] Expiry alerts: email 60 days + 14 days before expiry
+- [ ] Vault dashboard: visual map of what's in order, what's missing, what's expiring
+- [ ] RAG over user's own documents: "When does our BNR license expire?"
+
+### Consultant Product / B2B (Priority: Medium — Phase 3–4)
+*Full analysis in docs/VAULT_STRATEGY.md*
+- [ ] Multi-client dashboard (one consultant sees all their clients)
+- [ ] Per-client compliance status at a glance
+- [ ] Exportable compliance reports (PDF)
+- [ ] Separate pricing tier ($X/month per firm)
+- [ ] Target: PSF member firms, law firms, RDB-authorized agents
+
+### AI Compliance Chat vs Market Analyst — UX Differentiation (Priority: High — Phase 1.8)
+Currently both chats look identical. Needs clear visual and functional distinction:
+- Compliance Chat: "Your regulatory advisor" — knows your profile, personalized, cautious, always cites
+- Market Analyst: "Your market researcher" — talks about sectors/companies/ecosystem, data-driven
+- Consider: different color schemes, different UI layouts, different example prompts
+- Consider: compliance = free, market analyst = paid (or vice versa)
+- Full thinking in docs/VISION.md
+
+### The Compliance Score (Priority: Low — Phase 4)
+- A 0–100 score representing a business's compliance readiness
+- Based on: which steps are completed, what documents are in the vault, how recently verified
+- Shareable link (for investors, lenders, partners)
+- BZ Intelligence becomes a trusted credentialing layer
+
+### AI Compliance Document Drafter (Priority: Medium — Phase 3)
+- AI drafts RISA-compliant data protection policy from your profile
+- AI drafts AML/CFT policy for BNR PSP applicants
+- AI drafts Rwanda Labour Law compliant employment contract template
+- Watermarked: "Draft only — review with a qualified attorney before use"

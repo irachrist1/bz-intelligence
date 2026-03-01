@@ -6,28 +6,33 @@ Every decision below is made with three priorities: speed to market, operational
 
 ## The Stack at a Glance
 
-| Layer | Technology | Version |
-|-------|-----------|---------|
-| Frontend Framework | Next.js (App Router) | 14+ |
-| Language | TypeScript | 5+ |
-| Styling | Tailwind CSS + shadcn/ui | Latest |
-| Charts / Visualization | Recharts + Tremor | Latest |
-| State Management | Zustand | 4+ |
-| Database | Neon (serverless PostgreSQL) | Latest |
-| ORM | Drizzle ORM | Latest |
-| Vector Search | pgvector (via Neon) | Latest |
-| Authentication | Better Auth | Latest |
-| File Storage | Cloudflare R2 | Latest |
-| AI / LLM | Anthropic Claude API | claude-sonnet-4-6 |
-| AI SDK | Vercel AI SDK | 3+ |
-| Embedding Model | OpenAI text-embedding-3-small | Latest |
-| PDF Generation | Puppeteer | Latest |
-| Data Pipeline | Python 3.11 + pdfplumber + BeautifulSoup | Latest |
-| Email | Resend | Latest |
-| Payments | Stripe | Latest |
-| Deployment | Vercel (frontend) + Railway (pipeline/PDF) | — |
-| Monitoring | Sentry + Vercel Analytics | Latest |
-| Caching | Upstash Redis | Latest |
+> ✅ = installed and in use | 🔄 = installed, not yet integrated | ⬜ = planned, not yet added
+
+| Layer | Technology | Version | Status |
+|-------|-----------|---------|--------|
+| Frontend Framework | Next.js (App Router) | 16.1.6 | ✅ |
+| Language | TypeScript | 5+ | ✅ |
+| Styling | Tailwind CSS + shadcn/ui | Latest | ✅ |
+| Charts / Visualization | Recharts | Latest | ✅ |
+| ~~Tremor~~ | Removed | — | Incompatible with React 19 |
+| State Management | Zustand | — | ⬜ Not yet needed |
+| Database | Neon (serverless PostgreSQL) | Latest | ✅ Live |
+| ORM | Drizzle ORM | Latest | ✅ |
+| Vector Search | pgvector (via Neon) | 1024 dims | ✅ Enabled |
+| Authentication | Better Auth | Latest | ✅ Working |
+| File Storage | Cloudflare R2 | — | ⬜ Phase 3 |
+| AI / LLM | Anthropic Claude API | claude-sonnet-4-6 | 🔄 Wired, API key invalid |
+| AI SDK | Vercel AI SDK | v6 | ✅ (note: v6 has breaking changes from v3) |
+| Embedding Model | Voyage AI voyage-3 | 1024 dims | 🔄 Configured, knowledge base empty |
+| ~~OpenAI embeddings~~ | Replaced by Voyage AI | — | No OpenAI key needed |
+| PDF Generation | Puppeteer | — | ⬜ Phase 3 |
+| Data Pipeline | Python 3.11 + pdfplumber | — | ⬜ Phase 2 |
+| Email | Resend | Latest | 🔄 Credentials set, not integrated |
+| Payments | Stripe | — | ⬜ Phase 1 end |
+| Deployment | Vercel | — | ⬜ Not yet deployed |
+| Monitoring | Sentry | — | ⬜ Not yet installed |
+| Caching | Upstash Redis | Latest | 🔄 Credentials set, not integrated |
+| Theme | next-themes | — | ⬜ Needed (Phase 1) |
 
 ---
 
