@@ -22,9 +22,9 @@ The infrastructure is scaffolded. The app boots, auth works, onboarding works, a
 | Compliance roadmap page | ✅ Loads | Renders seeded steps, not yet personalized intelligently |
 | Compliance roadmap API | ✅ Works | Filters steps by sector and biz type from profile |
 | Step status updates (mark complete) | ✅ Works | Persisted to compliance_history table |
-| Compliance chat page | ✅ Redesigned | Blue "Compliance Advisor" identity, profile banner, citation cards, copy button, feedback; AI calls fail (invalid API key) |
+| Compliance chat page | ✅ Redesigned | Blue identity, model selector, staged thinking indicator, chat persists across tabs, citation cards, copy/feedback; AI fails without valid API key |
 | Intelligence directory page | ✅ Loads | Empty (no company data seeded) |
-| Intelligence chat page | ✅ Redesigned | Amber "Market Analyst" identity, sector filter panel; AI calls fail (invalid API key) |
+| Intelligence chat page | ✅ Redesigned | Amber identity, sector filter panel, model selector, staged thinking, chat persists; AI fails without valid API key |
 | Newsfeed page | ✅ Enhanced | Filter bar, read/unread state, article cards link to detail view |
 | Newsfeed article detail | ✅ Built | Full article view with impact stripe, source link, auto-mark-as-read |
 | Newsfeed read tracking | ⚠️ Schema ready | `newsReads` table defined; needs `npm run db:push` to activate |
@@ -252,6 +252,33 @@ Everything in the knowledge base has a "last verified" badge. When it goes stale
 4. **Seed new compliance steps** — 2 new foreign ownership steps were added to `lib/db/seed/compliance-steps.ts`. Run `npm run db:seed`.
 5. **Add `EMAIL_FROM` env var** — configure a verified Resend domain for welcome emails.
 6. **Expand knowledge base** — more sector-specific documents (agritech, health sector licensing, etc.)
+
+### ✅ Completed (session 5 — bug fixes: sources, persistence, model selector, thinking stages)
+
+#### Fixes applied
+- **Sources not rendering** — two-pronged fix:
+  - `parseResponse` regex made more robust: handles `## Sources`, `**Sources:**`, `Sources:` etc.
+  - System prompts updated to enforce exact `## Sources` heading so AI output is consistent
+- **Chats not saving** — localStorage persistence added to both chat pages:
+  - Messages loaded from localStorage on mount via `ChatInit.messages` prop
+  - Messages saved to localStorage on every update
+  - "Clear" button available to wipe chat history and reload
+- **No visual feedback before response** — staged thinking indicator:
+  - Fires only during `status === 'submitted'` (before streaming begins)
+  - Stages: "Thinking..." (immediate) → "Searching knowledge base..." (1.5s) → "Reviewing sources..." (7s) → "Composing response..." (18s)
+- **Profile banner removed** — was cluttering the Compliance Advisor header; user knows their own profile
+- **Model selector** — new `ModelSelector` component replaces static `ModelBadge`:
+  - Fetches available models from `/api/ai/model` (filters by which API keys are configured)
+  - Shows current model as a clickable badge; dropdown lists all available models
+  - Selection persisted in localStorage as `bz-selected-model`
+  - Uses body-ref mutation pattern: transport body is a mutable ref object; `modelOverride` is updated in-place on model change — no transport recreation needed
+  - `/api/ai/chat` accepts `modelOverride` in request body, validated against `ALLOWED_MODELS` whitelist
+
+#### GitHub
+- Repo created: https://github.com/irachrist1/bz-intelligence (private)
+- All code pushed to `main`
+
+---
 
 ### ✅ Completed (session 4 — AI chat UI overhaul + newsfeed + dark mode)
 
