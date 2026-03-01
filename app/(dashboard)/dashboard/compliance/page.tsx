@@ -140,8 +140,28 @@ export default function ComplianceRoadmapPage() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center">
-        <div className="text-zinc-400 text-sm">Loading your compliance roadmap...</div>
+      <div className="p-4 md:p-6 max-w-3xl mx-auto">
+        <div className="mb-6">
+          <div className="h-7 w-52 bg-zinc-200 dark:bg-zinc-800 rounded-md animate-pulse mb-2" />
+          <div className="h-4 w-72 bg-zinc-100 dark:bg-zinc-800/60 rounded animate-pulse" />
+        </div>
+        <div className="h-24 bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl animate-pulse mb-6" />
+        <div className="space-y-3">
+          {Array.from({ length: 5 }).map((_, i) => (
+            <div key={i} className="bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl p-4">
+              <div className="flex items-start gap-3">
+                <div className="h-5 w-5 rounded-full bg-zinc-200 dark:bg-zinc-700 shrink-0 animate-pulse" />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="h-4 w-40 bg-zinc-200 dark:bg-zinc-700 rounded animate-pulse" />
+                    <div className="h-4 w-10 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                  </div>
+                  <div className="h-3 w-3/4 bg-zinc-100 dark:bg-zinc-800 rounded animate-pulse" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
       </div>
     )
   }

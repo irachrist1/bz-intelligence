@@ -5,6 +5,7 @@ import { getSession } from '@/lib/auth/server'
 import { Badge } from '@/components/ui/badge'
 import Link from 'next/link'
 import { ExternalLink, Circle } from 'lucide-react'
+import { MarkAllReadButton } from './mark-all-read-button'
 
 // ── Filter bar ────────────────────────────────────────────────────────────────
 
@@ -121,12 +122,9 @@ function NewsCard({ item, isRead }: { item: NewsItemRow; isRead: boolean }) {
             {item.plainSummary ?? item.summary}
           </p>
 
-          {/* Source link */}
+          {/* Source label — decorative, card Link handles navigation */}
           {item.sourceUrl && (
-            <span
-              className="inline-flex items-center gap-1 text-xs text-blue-500 hover:text-blue-600 hover:underline mt-2"
-              onClick={(e) => e.preventDefault()} // let the Link handle navigation
-            >
+            <span className="inline-flex items-center gap-1 text-xs text-blue-500 mt-2">
               {item.sourceName ?? 'View source'}
               <ExternalLink className="h-3 w-3" />
             </span>
@@ -224,9 +222,12 @@ export default async function NewsfeedPage({ searchParams }: PageProps) {
             </p>
           </div>
           {news.length > 0 && unreadCount > 0 && (
-            <span className="text-xs text-zinc-400 dark:text-zinc-500">
-              {unreadCount} unread
-            </span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-zinc-400 dark:text-zinc-500">
+                {unreadCount} unread
+              </span>
+              <MarkAllReadButton unreadCount={unreadCount} />
+            </div>
           )}
         </div>
       </div>

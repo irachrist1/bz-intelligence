@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils'
 import {
   LayoutDashboard,
   ShieldCheck,
+  FolderLock,
   Building2,
   MessageSquare,
   Newspaper,
@@ -16,10 +17,11 @@ import {
   Sun,
   Moon,
 } from 'lucide-react'
+
 const complianceNav = [
   { href: '/dashboard/compliance', label: 'Roadmap', icon: LayoutDashboard },
   { href: '/dashboard/compliance/chat', label: 'Compliance Advisor', icon: ShieldCheck },
-  { href: '/dashboard/compliance/documents', label: 'Document Vault', icon: ShieldCheck },
+  { href: '/dashboard/compliance/documents', label: 'Document Vault', icon: FolderLock },
   { href: '/dashboard/compliance/newsfeed', label: 'Newsfeed', icon: Newspaper },
 ]
 
@@ -28,16 +30,21 @@ const intelligenceNav = [
   { href: '/dashboard/intelligence/chat', label: 'Market Analyst', icon: MessageSquare },
 ]
 
-export function Sidebar() {
+// Shared nav content — used by both desktop Sidebar and the mobile Sheet drawer
+export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () => void; frozenIsCompliance?: boolean }) {
   const pathname = usePathname()
   const { resolvedTheme, setTheme } = useTheme()
-  const isCompliance = pathname.startsWith('/dashboard/compliance')
+  const isCompliance = frozenIsCompliance ?? pathname.startsWith('/dashboard/compliance')
 
   return (
-    <aside className="flex flex-col w-60 border-r border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 h-screen sticky top-0">
+    <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
       {/* Logo */}
       <div className="px-4 py-5 border-b border-zinc-100 dark:border-zinc-800">
-        <Link href="/dashboard" className="font-semibold text-base tracking-tight text-zinc-900 dark:text-zinc-100">
+        <Link
+          href="/dashboard"
+          onClick={onClose}
+          className="font-semibold text-base tracking-tight text-zinc-900 dark:text-zinc-100"
+        >
           BZ Intelligence
         </Link>
       </div>
@@ -47,6 +54,7 @@ export function Sidebar() {
         <div className="flex rounded-lg bg-zinc-100 dark:bg-zinc-800/80 p-1 text-xs font-medium">
           <Link
             href="/dashboard/compliance"
+            onClick={onClose}
             className={cn(
               'flex-1 text-center py-1.5 rounded-md transition-colors',
               isCompliance
@@ -58,6 +66,7 @@ export function Sidebar() {
           </Link>
           <Link
             href="/dashboard/intelligence"
+            onClick={onClose}
             className={cn(
               'flex-1 text-center py-1.5 rounded-md transition-colors',
               !isCompliance
@@ -76,6 +85,7 @@ export function Sidebar() {
           <Link
             key={href}
             href={href}
+            onClick={onClose}
             className={cn(
               'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
               pathname === href
@@ -109,6 +119,15 @@ export function Sidebar() {
           Sign out
         </button>
       </div>
+    </div>
+  )
+}
+
+// Desktop-only sidebar — hidden on mobile (md: breakpoint)
+export function Sidebar() {
+  return (
+    <aside className="hidden md:flex flex-col w-60 border-r border-zinc-100 dark:border-zinc-800 h-screen sticky top-0 shrink-0">
+      <SidebarContent />
     </aside>
   )
 }

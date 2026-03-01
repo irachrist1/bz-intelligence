@@ -3,6 +3,7 @@ import { getSession } from '@/lib/auth/server'
 import { db } from '@/lib/db'
 import { businessProfiles, complianceSteps, complianceHistory } from '@/lib/db/schema'
 import { eq, and, sql } from 'drizzle-orm'
+// sql used in PATCH below
 import type { RoadmapEntry } from '@/lib/types'
 
 export async function GET(req: NextRequest) {
@@ -11,23 +12,19 @@ export async function GET(req: NextRequest) {
 
   const orgId = session.session.activeOrganizationId || session.user.id
 
-  // Get business profile
-  const profiles = await db
-    .select()
-    .from(businessProfiles)
-    .where(and(eq(businessProfiles.orgId, orgId), eq(businessProfiles.userId, session.user.id)))
-    .limit(1)
+  // Run all three DB queries in parallel — profile, steps, and history are independent
+  const [profiles, allSteps, history] = await Promise.all([
+    db.select().from(businessProfiles)
+      .where(and(eq(businessProfiles.orgId, orgId), eq(businessProfiles.userId, session.user.id)))
+      .limit(1),
+    db.select().from(complianceSteps).orderBy(complianceSteps.stepOrder),
+    db.select().from(complianceHistory).where(eq(complianceHistory.orgId, orgId)),
+  ])
 
   const profile = profiles[0]
   if (!profile) {
     return NextResponse.json({ steps: [], needsOnboarding: true })
   }
-
-  // Fetch all steps that could apply (we filter in-app for flexibility)
-  const allSteps = await db
-    .select()
-    .from(complianceSteps)
-    .orderBy(complianceSteps.stepOrder)
 
   // Filter steps applicable to this business using trigger flags
   const applicableSteps = allSteps.filter((step) => {
@@ -74,13 +71,6 @@ export async function GET(req: NextRequest) {
   if (applicableSteps.length === 0) {
     return NextResponse.json({ steps: [], profile, needsOnboarding: false })
   }
-
-  // Get completion history for this org
-  const stepIds = applicableSteps.map((s) => s.id)
-  const history = await db
-    .select()
-    .from(complianceHistory)
-    .where(and(eq(complianceHistory.orgId, orgId)))
 
   const historyMap = new Map(history.map((h) => [h.stepId, h]))
 

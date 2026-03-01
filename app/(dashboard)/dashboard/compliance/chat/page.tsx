@@ -161,18 +161,18 @@ export default function ComplianceChatPage() {
   return (
     <div className="flex flex-col h-full">
       {/* ── Header — blue identity ─────────────────────────────────────────── */}
-      <div className="px-6 py-4 border-b border-blue-100 bg-blue-50/60 dark:bg-blue-950/20 dark:border-blue-900/40">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="h-9 w-9 rounded-lg bg-blue-600 dark:bg-blue-700 text-white flex items-center justify-center shrink-0">
-              <Shield style={{ width: '18px', height: '18px' }} />
+      <div className="px-3 py-3 md:px-6 md:py-4 border-b border-blue-100 bg-blue-50/60 dark:bg-blue-950/20 dark:border-blue-900/40 shrink-0">
+        <div className="flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="h-8 w-8 md:h-9 md:w-9 rounded-lg bg-blue-600 dark:bg-blue-700 text-white flex items-center justify-center shrink-0">
+              <Shield className="h-4 w-4" />
             </div>
-            <div>
-              <h1 className="font-semibold text-zinc-900 dark:text-zinc-100">Compliance Advisor</h1>
-              <p className="text-xs text-zinc-500 mt-0.5">Rwanda regulatory guidance · Verified sources only</p>
+            <div className="min-w-0">
+              <h1 className="font-semibold text-sm md:text-base text-zinc-900 dark:text-zinc-100 leading-tight">Compliance Advisor</h1>
+              <p className="text-xs text-zinc-500 mt-0.5 hidden sm:block truncate">Rwanda regulatory guidance · Verified sources only</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 shrink-0">
             <ModelSelector onSelect={handleModelSelect} />
             {messages.length > 0 && (
               <button
@@ -190,19 +190,18 @@ export default function ComplianceChatPage() {
       </div>
 
       {/* ── Messages ──────────────────────────────────────────────────────── */}
-      <ScrollArea className="flex-1 px-6 py-4">
+      <ScrollArea className="flex-1 px-3 py-4 md:px-6">
         {messages.length === 0 ? (
           <div className="max-w-2xl mx-auto">
-            <div className="text-center mb-8 pt-8">
-              <div className="h-14 w-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                <Shield className="h-7 w-7 text-blue-600 dark:text-blue-400" />
+            <div className="text-center mb-6 pt-4 md:mb-8 md:pt-8">
+              <div className="h-12 w-12 md:h-14 md:w-14 bg-blue-100 dark:bg-blue-900/40 rounded-2xl flex items-center justify-center mx-auto mb-3 md:mb-4">
+                <Shield className="h-6 w-6 md:h-7 md:w-7 text-blue-600 dark:text-blue-400" />
               </div>
-              <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
+              <h2 className="text-base md:text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-2">
                 Your Rwanda compliance advisor
               </h2>
               <p className="text-sm text-zinc-500 dark:text-zinc-400 max-w-sm mx-auto">
-                Ask anything about licensing, registration, taxes, or regulatory requirements. Every answer cites
-                verified sources.
+                Ask anything about licensing, registration, taxes, or regulatory requirements.
               </p>
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
@@ -225,23 +224,23 @@ export default function ComplianceChatPage() {
                 m.role === 'assistant' ? parseResponse(textContent) : { mainContent: textContent, sources: [] }
 
               return (
-                <div key={m.id} className={cn('flex gap-3', m.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
+                <div key={m.id} className={cn('flex gap-2 md:gap-3', m.role === 'user' ? 'flex-row-reverse' : 'flex-row')}>
                   <div
                     className={cn(
-                      'h-8 w-8 rounded-full flex items-center justify-center shrink-0',
+                      'h-7 w-7 md:h-8 md:w-8 rounded-full flex items-center justify-center shrink-0',
                       m.role === 'user'
                         ? 'bg-zinc-900 text-white dark:bg-zinc-200 dark:text-zinc-900'
                         : 'bg-blue-100 dark:bg-blue-900/50 text-blue-600 dark:text-blue-400',
                     )}
                   >
-                    {m.role === 'user' ? <User className="h-4 w-4" /> : <Shield className="h-4 w-4" />}
+                    {m.role === 'user' ? <User className="h-3.5 w-3.5" /> : <Shield className="h-3.5 w-3.5" />}
                   </div>
 
                   <div
                     className={cn(
-                      'flex-1 rounded-xl px-4 py-3 text-sm leading-relaxed',
+                      'flex-1 rounded-xl px-3 py-2.5 md:px-4 md:py-3 text-sm leading-relaxed min-w-0',
                       m.role === 'user'
-                        ? 'bg-zinc-900 text-white dark:bg-zinc-800 max-w-sm'
+                        ? 'bg-zinc-900 text-white dark:bg-zinc-800 max-w-[85%]'
                         : 'bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-200',
                     )}
                   >
@@ -349,14 +348,14 @@ export default function ComplianceChatPage() {
       </ScrollArea>
 
       {/* ── Input ─────────────────────────────────────────────────────────── */}
-      <div className="px-6 py-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950">
+      <div className="px-3 py-3 md:px-6 md:py-4 border-t border-zinc-100 dark:border-zinc-800 bg-white dark:bg-zinc-950 shrink-0">
         <div className="max-w-2xl mx-auto">
           <form onSubmit={handleSubmit} className="flex gap-2 items-end">
             <Textarea
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder="Ask about your compliance requirements..."
-              className="min-h-[52px] max-h-32 resize-none text-sm"
+              className="min-h-[48px] max-h-32 resize-none text-sm"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && !e.shiftKey) {
                   e.preventDefault()
@@ -368,12 +367,12 @@ export default function ComplianceChatPage() {
               type="submit"
               size="icon"
               disabled={isLoading || !input.trim()}
-              className="h-[52px] w-[52px] shrink-0 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+              className="h-12 w-12 shrink-0 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
             >
               <Send className="h-4 w-4" />
             </Button>
           </form>
-          <p className="text-xs text-zinc-400 mt-2 text-center">
+          <p className="text-xs text-zinc-400 mt-2 text-center hidden sm:block">
             General guidance only — not legal advice. Verify requirements with the relevant regulatory body.
           </p>
         </div>
