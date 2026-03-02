@@ -6,39 +6,34 @@ import { signOut } from '@/lib/auth/client'
 import { cn } from '@/lib/utils'
 import { toast } from 'sonner'
 import {
-  LayoutDashboard,
-  ShieldCheck,
-  FolderLock,
-  Building2,
-  MessageSquare,
+  Bell,
+  Bookmark,
+  BriefcaseBusiness,
+  KanbanSquare,
   Newspaper,
   LogOut,
   ChevronRight,
+  Settings2,
 } from 'lucide-react'
 
-const complianceNav = [
-  { href: '/dashboard/compliance', label: 'Roadmap', icon: LayoutDashboard },
-  { href: '/dashboard/compliance/chat', label: 'Compliance Advisor', icon: ShieldCheck },
-  { href: '/dashboard/compliance/documents', label: 'Document Vault', icon: FolderLock },
-  { href: '/dashboard/compliance/newsfeed', label: 'Newsfeed', icon: Newspaper },
-]
-
-const intelligenceNav = [
-  { href: '/dashboard/intelligence', label: 'Companies', icon: Building2 },
-  { href: '/dashboard/intelligence/chat', label: 'Market Analyst', icon: MessageSquare },
+const tenderNav = [
+  { href: '/dashboard/tenders', label: 'Feed', icon: Newspaper },
+  { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
+  { href: '/dashboard/saved', label: 'Saved', icon: Bookmark },
+  { href: '/dashboard/alerts', label: 'Alerts', icon: Bell },
+  { href: '/dashboard/profile', label: 'Profile', icon: BriefcaseBusiness },
+  { href: '/dashboard/admin', label: 'Admin', icon: Settings2 },
 ]
 
 type SidebarContentProps = {
   onClose?: () => void
-  frozenIsCompliance?: boolean
   collapsed?: boolean
 }
 
 // Shared nav content — used by both desktop Sidebar and the mobile Sheet drawer
-export function SidebarContent({ onClose, frozenIsCompliance, collapsed = false }: SidebarContentProps) {
+export function SidebarContent({ onClose, collapsed = false }: SidebarContentProps) {
   const pathname = usePathname()
   const router = useRouter()
-  const isCompliance = frozenIsCompliance ?? pathname.startsWith('/dashboard/compliance')
 
   async function handleSignOut() {
     try {
@@ -71,7 +66,7 @@ export function SidebarContent({ onClose, frozenIsCompliance, collapsed = false 
         collapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-5',
       )}>
         <Link
-          href="/dashboard"
+          href="/dashboard/tenders"
           onClick={onClose}
           className={cn(
             'font-semibold tracking-tight text-zinc-900 dark:text-zinc-100',
@@ -83,93 +78,34 @@ export function SidebarContent({ onClose, frozenIsCompliance, collapsed = false 
         </Link>
       </div>
 
-      {/* Mode switcher */}
-      {collapsed ? (
-        <div className="px-2 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="space-y-1">
-            <Link
-              href="/dashboard/compliance"
-              onClick={onClose}
-              title="Compliance"
-              className={cn(
-                'mx-auto h-9 w-9 rounded-md flex items-center justify-center transition-colors',
-                isCompliance
-                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
-              )}
-            >
-              <ShieldCheck className="h-4 w-4 shrink-0" />
-            </Link>
-            <Link
-              href="/dashboard/intelligence"
-              onClick={onClose}
-              title="Intelligence"
-              className={cn(
-                'mx-auto h-9 w-9 rounded-md flex items-center justify-center transition-colors',
-                !isCompliance
-                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
-              )}
-            >
-              <Building2 className="h-4 w-4 shrink-0" />
-            </Link>
-          </div>
-        </div>
-      ) : (
-        <div className="px-3 py-3 border-b border-zinc-100 dark:border-zinc-800">
-          <div className="flex rounded-lg bg-zinc-100 dark:bg-zinc-800/80 p-1 text-xs font-medium">
-            <Link
-              href="/dashboard/compliance"
-              onClick={onClose}
-              className={cn(
-                'flex-1 text-center py-1.5 rounded-md transition-colors',
-                isCompliance
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
-              )}
-            >
-              Compliance
-            </Link>
-            <Link
-              href="/dashboard/intelligence"
-              onClick={onClose}
-              className={cn(
-                'flex-1 text-center py-1.5 rounded-md transition-colors',
-                !isCompliance
-                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
-              )}
-            >
-              Intelligence
-            </Link>
-          </div>
-        </div>
-      )}
-
       {/* Nav links */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
-        {(isCompliance ? complianceNav : intelligenceNav).map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            onClick={onClose}
-            title={collapsed ? label : undefined}
-            className={cn(
-              collapsed
-                ? 'mx-auto h-9 w-9 flex items-center justify-center rounded-md transition-colors'
-                : 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
-              pathname === href
-                ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
-            )}
-          >
-            <Icon className="h-4 w-4 shrink-0" />
-            {!collapsed && label}
-            {!collapsed && pathname === href && (
-              <ChevronRight className="ml-auto h-3 w-3 text-zinc-400 dark:text-zinc-500" />
-            )}
-          </Link>
-        ))}
+        {tenderNav.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href || pathname.startsWith(`${href}/`)
+
+          return (
+            <Link
+              key={href}
+              href={href}
+              onClick={onClose}
+              title={collapsed ? label : undefined}
+              className={cn(
+                collapsed
+                  ? 'mx-auto h-9 w-9 flex items-center justify-center rounded-md transition-colors'
+                  : 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
+                isActive
+                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+              )}
+            >
+              <Icon className="h-4 w-4 shrink-0" />
+              {!collapsed && label}
+              {!collapsed && isActive && (
+                <ChevronRight className="ml-auto h-3 w-3 text-zinc-400 dark:text-zinc-500" />
+              )}
+            </Link>
+          )
+        })}
       </nav>
 
       {/* Footer */}

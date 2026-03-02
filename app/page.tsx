@@ -1,32 +1,31 @@
 import Link from 'next/link'
 import { redirect } from 'next/navigation'
-import { ArrowRight, Database, Newspaper, ShieldCheck, Sparkles } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { ArrowRight, KanbanSquare, Newspaper, Sparkles, Target } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { getSession } from '@/lib/auth/server'
 
 const pillars = [
   {
-    title: 'Intelligence Mode',
-    description: 'Search Rwanda companies, compare sectors, and explore the market with a grounded AI analyst.',
-    icon: Database,
-  },
-  {
-    title: 'Compliance Mode',
-    description: 'Get a personalized compliance roadmap with clear next steps and source-backed guidance.',
-    icon: ShieldCheck,
-  },
-  {
-    title: 'Regulatory Newsfeed',
-    description: 'Track high-impact updates from Rwanda regulators and focus on what actually affects your business.',
+    title: 'Aggregated Tender Feed',
+    description: 'Track opportunities from RPPA, donor portals, and agency notices in one continuous feed.',
     icon: Newspaper,
+  },
+  {
+    title: 'Smart Matching',
+    description: 'Filter tenders by your firm profile so your team sees high-fit opportunities first.',
+    icon: Target,
+  },
+  {
+    title: 'Pipeline Tracker',
+    description: 'Move tenders from watching to submitted with ownership, notes, and deadlines in one workflow.',
+    icon: KanbanSquare,
   },
 ]
 
 const trustSignals = [
-  'Grounded in Rwanda-specific sources',
-  'Personalized by business profile',
-  'Built for founders, investors, and operators',
+  '10+ fragmented procurement portals monitored in one platform',
+  'Built for BD teams at service firms across Rwanda and East Africa',
+  'Structured to help you find tenders before deadlines become impossible',
 ]
 
 export default async function HomePage() {
@@ -51,17 +50,17 @@ export default async function HomePage() {
 
       <main className="relative max-w-6xl mx-auto px-6 pb-20">
         <section className="pt-14 md:pt-20 text-center">
-          
           <h1 className="text-4xl md:text-6xl font-semibold tracking-tight leading-tight max-w-4xl mx-auto">
-            Move from scattered regulation to decisive execution.
+            Never miss a tender that your firm could win.
           </h1>
           <p className="mt-5 text-base md:text-lg text-zinc-600 dark:text-zinc-400 max-w-2xl mx-auto leading-relaxed">
-            BZ Intelligence combines verified market data, compliance workflows, and AI guidance into one platform built for Rwanda.
+            Public and donor-funded opportunities are scattered across RPPA, agency portals, and partner sites.
+            BZ Intelligence brings them into one procurement intelligence platform.
           </p>
           <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Link href="/sign-up">
               <Button size="lg" className="px-8">
-                Create account
+                Start monitoring
                 <ArrowRight className="h-4 w-4 ml-1.5" />
               </Button>
             </Link>
@@ -91,7 +90,7 @@ export default async function HomePage() {
         <section className="mt-12 rounded-2xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 md:p-7">
           <div className="flex items-center gap-2 text-zinc-800 dark:text-zinc-200 mb-3">
             <Sparkles className="h-4 w-4" />
-            <p className="text-sm font-medium">Built for high-confidence decisions</p>
+            <p className="text-sm font-medium">Procurement intelligence for teams that bid to win</p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {trustSignals.map((item) => (
@@ -101,6 +100,7 @@ export default async function HomePage() {
             ))}
           </div>
         </section>
+
       </main>
     </div>
   )

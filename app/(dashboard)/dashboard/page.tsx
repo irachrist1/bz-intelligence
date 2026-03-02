@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation'
 
-// Default dashboard redirects to compliance mode (Phase 1 priority)
+// Default dashboard redirects to the tender feed
 export default function DashboardPage() {
-  redirect('/dashboard/compliance')
+  redirect('/dashboard/tenders')
 }

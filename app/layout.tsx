@@ -10,7 +10,7 @@ const geistMono = Geist_Mono({ subsets: ['latin'], variable: '--font-geist-mono'
 export const metadata: Metadata = {
   title: 'BZ Intelligence',
   description:
-    'Verified business intelligence and compliance guidance for Rwanda. Navigate regulations, explore companies, and get AI-powered answers grounded in verified data.',
+    'Tender intelligence platform for Rwanda and East Africa. Track procurement opportunities, match to firm capabilities, and manage bid pipelines in one workspace.',
 }
 
 const themeInitScript = `

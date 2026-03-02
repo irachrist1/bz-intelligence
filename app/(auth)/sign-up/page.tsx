@@ -102,7 +102,7 @@ export default function SignUpPage() {
     <Card className="border-zinc-200 dark:border-zinc-800">
       <CardHeader>
         <CardTitle>Create your account</CardTitle>
-        <CardDescription>Set up your workspace and complete onboarding in under 2 minutes</CardDescription>
+        <CardDescription>Set up your tender monitoring workspace in under 2 minutes</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense

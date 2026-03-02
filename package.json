@@ -13,7 +13,8 @@
     "db:seed": "tsx lib/db/seed/index.ts",
     "kb:ingest": "tsx scripts/ingest-document.ts",
     "kb:clear": "tsx scripts/ingest-document.ts --clear",
-    "seed:news": "tsx scripts/seed-news.ts"
+    "seed:news": "tsx scripts/seed-news.ts",
+    "seed:sources": "tsx scripts/seed-tender-sources.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.50",

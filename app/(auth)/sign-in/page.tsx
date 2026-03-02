@@ -97,7 +97,7 @@ export default function SignInPage() {
     <Card className="border-zinc-200 dark:border-zinc-800">
       <CardHeader>
         <CardTitle>Sign in</CardTitle>
-        <CardDescription>Access your compliance and intelligence workspace</CardDescription>
+        <CardDescription>Access your tender intelligence workspace</CardDescription>
       </CardHeader>
       <CardContent>
         <Suspense

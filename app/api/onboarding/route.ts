@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth/server'
 import { db } from '@/lib/db'
-import { businessProfiles } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { firmProfiles } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 import { sendWelcomeEmail } from '@/lib/email'
 
 export async function POST(req: NextRequest) {
@@ -13,54 +13,74 @@ export async function POST(req: NextRequest) {
   const orgId = session.session.activeOrganizationId || user.id // fallback to userId if no org yet
 
   const body = await req.json()
-  const {
-    bizName, bizType, sector, subSector, customerType, currentStatus,
-    handlesMoney, collectsData, foreignOwnership, operatesProvince, employeeRange,
-    transactionType,
-  } = body
+  const normalizeArray = (value: unknown) =>
+    Array.isArray(value)
+      ? value.filter((item): item is string => typeof item === 'string').map((item) => item.trim()).filter(Boolean)
+      : []
 
-  const profileData = {
-    bizName: bizName || null,
-    bizType: bizType || null,
-    sector: sector || null,
-    subSector: subSector || [],
-    customerType: customerType || null,
-    currentStatus: currentStatus || null,
-    handlesMoney: handlesMoney ?? false,
-    collectsData: collectsData ?? false,
-    foreignOwnership: foreignOwnership ?? false,
-    operatesProvince: operatesProvince ?? false,
-    employeeRange: employeeRange || null,
-    transactionType: transactionType || [],
-    updatedAt: new Date(),
+  const toKeywords = (value: unknown) =>
+    typeof value === 'string'
+      ? value.split(',').map((item) => item.trim()).filter(Boolean)
+      : normalizeArray(value)
+
+  const contractRangeMap: Record<string, { min: number | null; max: number | null }> = {
+    lt_50k: { min: null, max: 50000 },
+    '50k_250k': { min: 50000, max: 250000 },
+    '250k_1m': { min: 250000, max: 1000000 },
+    gt_1m: { min: 1000000, max: null },
   }
 
-  // Upsert business profile
-  const existing = await db
-    .select()
-    .from(businessProfiles)
-    .where(and(eq(businessProfiles.orgId, orgId), eq(businessProfiles.userId, user.id)))
+  const firmName = typeof body.firmName === 'string' ? body.firmName.trim() : ''
+  const legalEntityType = typeof body.legalEntityType === 'string' ? body.legalEntityType : null
+  const serviceCategories = normalizeArray(body.serviceCategories)
+  const sectors = normalizeArray(body.sectors)
+  const fundingSources = normalizeArray(body.fundingSources)
+  const countries = normalizeArray(body.countries)
+  const languages = normalizeArray(body.languages)
+  const keywordsInclude = toKeywords(body.keywordsInclude)
+  const keywordsExclude = toKeywords(body.keywordsExclude)
+  const contractSizeRange = typeof body.contractSizeRange === 'string' ? body.contractSizeRange : ''
+  const contractRange = contractRangeMap[contractSizeRange] ?? { min: null, max: null }
+  const now = new Date()
+
+  const existingFirmProfile = await db
+    .select({ id: firmProfiles.id })
+    .from(firmProfiles)
+    .where(eq(firmProfiles.orgId, orgId))
     .limit(1)
 
-  const isNewProfile = existing.length === 0
+  const isNewProfile = existingFirmProfile.length === 0
+  const firmProfileData = {
+    firmName: firmName || null,
+    legalEntityType,
+    serviceCategories,
+    sectors,
+    contractSizeMinUsd: contractRange.min,
+    contractSizeMaxUsd: contractRange.max,
+    fundingSources,
+    countries,
+    languages,
+    keywordsInclude,
+    keywordsExclude,
+    updatedAt: now,
+  }
 
   if (isNewProfile) {
-    await db.insert(businessProfiles).values({ orgId, userId: user.id, ...profileData })
+    await db.insert(firmProfiles).values({ orgId, ...firmProfileData })
   } else {
     await db
-      .update(businessProfiles)
-      .set(profileData)
-      .where(eq(businessProfiles.id, existing[0].id))
+      .update(firmProfiles)
+      .set(firmProfileData)
+      .where(eq(firmProfiles.id, existingFirmProfile[0].id))
   }
 
   // Send welcome email on first onboarding completion (fire-and-forget, never blocks)
   if (isNewProfile && user.email) {
-    const appMode = body.appMode || 'compliance'
     sendWelcomeEmail({
       email: user.email,
       name: user.name,
-      sector: sector || null,
-      mode: appMode,
+      sector: sectors[0] || null,
+      mode: 'tender',
     }).catch((err) => console.error('Welcome email failed (non-blocking):', err))
   }
 
