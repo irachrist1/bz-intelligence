@@ -96,7 +96,12 @@ export default function ComplianceChatPage() {
     }
   })
 
-  const { messages, sendMessage, status, error } = useChat({ transport, messages: initialMessages })
+  const { messages, sendMessage, status, error } = useChat({
+    id: STORAGE_KEY,
+    transport,
+    messages: initialMessages,
+    resume: true,
+  })
   const isLoading = status === 'submitted' || status === 'streaming'
 
   // Persist messages to localStorage on every change

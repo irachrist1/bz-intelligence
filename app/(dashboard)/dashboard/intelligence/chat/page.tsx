@@ -121,7 +121,12 @@ function ChatArea({ sector, onModelSelect }: { sector: string; onModelSelect: (i
     try { return JSON.parse(localStorage.getItem(storageKey) || '[]') } catch { return [] }
   })
 
-  const { messages, sendMessage, status, error } = useChat({ transport, messages: initialMessages })
+  const { messages, sendMessage, status, error } = useChat({
+    id: storageKey,
+    transport,
+    messages: initialMessages,
+    resume: true,
+  })
   const isLoading = status === 'submitted' || status === 'streaming'
 
   useEffect(() => {
@@ -327,7 +332,13 @@ function ChatArea({ sector, onModelSelect }: { sector: string; onModelSelect: (i
 
 export default function IntelligenceChatPage() {
   const [activeSector, setActiveSector] = useState('all')
+  const [mountedSectors, setMountedSectors] = useState<string[]>(['all'])
   const handleModelSelect = useCallback((_modelId: string) => {}, [])
+
+  function handleSectorSelect(sectorId: string) {
+    setActiveSector(sectorId)
+    setMountedSectors((prev) => (prev.includes(sectorId) ? prev : [...prev, sectorId]))
+  }
 
   return (
     <div className="flex flex-col h-full">
@@ -336,7 +347,7 @@ export default function IntelligenceChatPage() {
         {SECTORS.map((s) => (
           <button
             key={s.id}
-            onClick={() => setActiveSector(s.id)}
+            onClick={() => handleSectorSelect(s.id)}
             className={cn(
               'shrink-0 px-3 py-1 rounded-full text-xs font-medium transition-colors whitespace-nowrap',
               activeSector === s.id
@@ -358,7 +369,7 @@ export default function IntelligenceChatPage() {
             {SECTORS.map((s) => (
               <button
                 key={s.id}
-                onClick={() => setActiveSector(s.id)}
+                onClick={() => handleSectorSelect(s.id)}
                 className={cn(
                   'w-full text-left px-2.5 py-1.5 rounded-md text-sm transition-colors',
                   activeSector === s.id
@@ -372,7 +383,7 @@ export default function IntelligenceChatPage() {
           </div>
           {activeSector !== 'all' && (
             <button
-              onClick={() => setActiveSector('all')}
+              onClick={() => handleSectorSelect('all')}
               className="mt-3 px-2.5 py-1 text-xs text-zinc-400 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors text-left"
             >
               Clear filter
@@ -380,8 +391,14 @@ export default function IntelligenceChatPage() {
           )}
         </div>
 
-        {/* Chat area — key remounts on sector change */}
-        <ChatArea key={activeSector} sector={activeSector} onModelSelect={handleModelSelect} />
+        {/* Keep mounted sector chats alive so streaming can continue in background. */}
+        <div className="flex flex-1 min-h-0 min-w-0">
+          {mountedSectors.map((sectorId) => (
+            <div key={sectorId} className={cn('min-w-0 min-h-0 flex-1', activeSector === sectorId ? 'flex' : 'hidden')}>
+              <ChatArea sector={sectorId} onModelSelect={handleModelSelect} />
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )

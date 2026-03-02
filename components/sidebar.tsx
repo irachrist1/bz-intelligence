@@ -28,8 +28,14 @@ const intelligenceNav = [
   { href: '/dashboard/intelligence/chat', label: 'Market Analyst', icon: MessageSquare },
 ]
 
+type SidebarContentProps = {
+  onClose?: () => void
+  frozenIsCompliance?: boolean
+  collapsed?: boolean
+}
+
 // Shared nav content — used by both desktop Sidebar and the mobile Sheet drawer
-export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () => void; frozenIsCompliance?: boolean }) {
+export function SidebarContent({ onClose, frozenIsCompliance, collapsed = false }: SidebarContentProps) {
   const pathname = usePathname()
   const router = useRouter()
   const isCompliance = frozenIsCompliance ?? pathname.startsWith('/dashboard/compliance')
@@ -60,45 +66,85 @@ export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () =
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
       {/* Logo */}
-      <div className="px-4 py-5 border-b border-zinc-100 dark:border-zinc-800">
+      <div className={cn(
+        'border-b border-zinc-100 dark:border-zinc-800',
+        collapsed ? 'px-2 py-4 flex justify-center' : 'px-4 py-5',
+      )}>
         <Link
           href="/dashboard"
           onClick={onClose}
-          className="font-semibold text-base tracking-tight text-zinc-900 dark:text-zinc-100"
+          className={cn(
+            'font-semibold tracking-tight text-zinc-900 dark:text-zinc-100',
+            collapsed ? 'inline-flex items-center justify-center h-9 w-9 rounded-lg bg-zinc-100 dark:bg-zinc-800 text-xs' : 'text-base',
+          )}
+          title={collapsed ? 'BZ Intelligence' : undefined}
         >
-          BZ Intelligence
+          {collapsed ? 'BZ' : 'BZ Intelligence'}
         </Link>
       </div>
 
       {/* Mode switcher */}
-      <div className="px-3 py-3 border-b border-zinc-100 dark:border-zinc-800">
-        <div className="flex rounded-lg bg-zinc-100 dark:bg-zinc-800/80 p-1 text-xs font-medium">
-          <Link
-            href="/dashboard/compliance"
-            onClick={onClose}
-            className={cn(
-              'flex-1 text-center py-1.5 rounded-md transition-colors',
-              isCompliance
-                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
-            )}
-          >
-            Compliance
-          </Link>
-          <Link
-            href="/dashboard/intelligence"
-            onClick={onClose}
-            className={cn(
-              'flex-1 text-center py-1.5 rounded-md transition-colors',
-              !isCompliance
-                ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
-                : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
-            )}
-          >
-            Intelligence
-          </Link>
+      {collapsed ? (
+        <div className="px-2 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="space-y-1">
+            <Link
+              href="/dashboard/compliance"
+              onClick={onClose}
+              title="Compliance"
+              className={cn(
+                'mx-auto h-9 w-9 rounded-md flex items-center justify-center transition-colors',
+                isCompliance
+                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+              )}
+            >
+              <ShieldCheck className="h-4 w-4 shrink-0" />
+            </Link>
+            <Link
+              href="/dashboard/intelligence"
+              onClick={onClose}
+              title="Intelligence"
+              className={cn(
+                'mx-auto h-9 w-9 rounded-md flex items-center justify-center transition-colors',
+                !isCompliance
+                  ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
+              )}
+            >
+              <Building2 className="h-4 w-4 shrink-0" />
+            </Link>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="px-3 py-3 border-b border-zinc-100 dark:border-zinc-800">
+          <div className="flex rounded-lg bg-zinc-100 dark:bg-zinc-800/80 p-1 text-xs font-medium">
+            <Link
+              href="/dashboard/compliance"
+              onClick={onClose}
+              className={cn(
+                'flex-1 text-center py-1.5 rounded-md transition-colors',
+                isCompliance
+                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
+              )}
+            >
+              Compliance
+            </Link>
+            <Link
+              href="/dashboard/intelligence"
+              onClick={onClose}
+              className={cn(
+                'flex-1 text-center py-1.5 rounded-md transition-colors',
+                !isCompliance
+                  ? 'bg-white dark:bg-zinc-700 text-zinc-900 dark:text-zinc-100 shadow-sm'
+                  : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200',
+              )}
+            >
+              Intelligence
+            </Link>
+          </div>
+        </div>
+      )}
 
       {/* Nav links */}
       <nav className="flex-1 px-3 py-3 space-y-0.5">
@@ -107,16 +153,19 @@ export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () =
             key={href}
             href={href}
             onClick={onClose}
+            title={collapsed ? label : undefined}
             className={cn(
-              'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
+              collapsed
+                ? 'mx-auto h-9 w-9 flex items-center justify-center rounded-md transition-colors'
+                : 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm transition-colors',
               pathname === href
                 ? 'bg-zinc-100 dark:bg-zinc-800 text-zinc-900 dark:text-zinc-100 font-medium'
                 : 'text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50',
             )}
           >
             <Icon className="h-4 w-4 shrink-0" />
-            {label}
-            {pathname === href && (
+            {!collapsed && label}
+            {!collapsed && pathname === href && (
               <ChevronRight className="ml-auto h-3 w-3 text-zinc-400 dark:text-zinc-500" />
             )}
           </Link>
@@ -125,13 +174,17 @@ export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () =
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
-        
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 w-full transition-colors"
+          title={collapsed ? 'Sign out' : undefined}
+          className={cn(
+            collapsed
+              ? 'mx-auto h-9 w-9 flex items-center justify-center rounded-md text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition-colors'
+              : 'flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 w-full transition-colors',
+          )}
         >
           <LogOut className="h-4 w-4 shrink-0" />
-          Sign out
+          {!collapsed && 'Sign out'}
         </button>
       </div>
     </div>
