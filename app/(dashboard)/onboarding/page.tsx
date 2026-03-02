@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
@@ -32,6 +32,7 @@ const TOTAL_STEPS = 5
 
 export default function OnboardingPage() {
   const router = useRouter()
+  const searchParams = useSearchParams()
   const [step, setStep] = useState(0)
   const [loading, setLoading] = useState(false)
   const [appMode, setAppMode] = useState<AppMode>('compliance')
@@ -68,7 +69,10 @@ export default function OnboardingPage() {
         body: JSON.stringify({ ...profile, appMode }),
       })
       if (!res.ok) throw new Error('Failed to save profile')
-      const destination = appMode === 'intelligence' ? '/dashboard/intelligence' : '/dashboard/compliance'
+      const requestedPath = searchParams.get('callbackUrl')
+      const destination = requestedPath && requestedPath.startsWith('/')
+        ? requestedPath
+        : (appMode === 'intelligence' ? '/dashboard/intelligence' : '/dashboard/compliance')
       router.push(destination)
     } catch {
       toast.error('Could not save your profile. Please try again.')

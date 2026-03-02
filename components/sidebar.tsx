@@ -1,10 +1,10 @@
 'use client'
 
 import Link from 'next/link'
-import { usePathname } from 'next/navigation'
-import { useTheme } from 'next-themes'
+import { usePathname, useRouter } from 'next/navigation'
 import { signOut } from '@/lib/auth/client'
 import { cn } from '@/lib/utils'
+import { toast } from 'sonner'
 import {
   LayoutDashboard,
   ShieldCheck,
@@ -14,8 +14,6 @@ import {
   Newspaper,
   LogOut,
   ChevronRight,
-  Sun,
-  Moon,
 } from 'lucide-react'
 
 const complianceNav = [
@@ -33,8 +31,31 @@ const intelligenceNav = [
 // Shared nav content — used by both desktop Sidebar and the mobile Sheet drawer
 export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () => void; frozenIsCompliance?: boolean }) {
   const pathname = usePathname()
-  const { resolvedTheme, setTheme } = useTheme()
+  const router = useRouter()
   const isCompliance = frozenIsCompliance ?? pathname.startsWith('/dashboard/compliance')
+
+  async function handleSignOut() {
+    try {
+      const result = await signOut()
+      if (result?.error) throw new Error(result.error.message || 'Sign out failed')
+    } catch {
+      // Fallback to same-origin endpoint in case client baseURL/env is mismatched.
+      try {
+        await fetch('/api/auth/sign-out', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: '{}',
+        })
+      } catch {
+        toast.error('Sign out failed. Please refresh and try again.')
+        return
+      }
+    }
+
+    router.replace('/')
+    router.refresh()
+  }
 
   return (
     <div className="flex flex-col h-full bg-white dark:bg-zinc-950">
@@ -104,15 +125,9 @@ export function SidebarContent({ onClose, frozenIsCompliance }: { onClose?: () =
 
       {/* Footer */}
       <div className="px-3 py-3 border-t border-zinc-100 dark:border-zinc-800 space-y-0.5">
+        
         <button
-          onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 w-full transition-colors"
-        >
-          {resolvedTheme === 'dark' ? <Sun className="h-4 w-4 shrink-0" /> : <Moon className="h-4 w-4 shrink-0" />}
-          {resolvedTheme === 'dark' ? 'Light mode' : 'Dark mode'}
-        </button>
-        <button
-          onClick={() => signOut().then(() => { window.location.href = '/' })}
+          onClick={handleSignOut}
           className="flex items-center gap-2.5 px-2.5 py-2 rounded-md text-sm text-zinc-500 dark:text-zinc-400 hover:text-zinc-700 dark:hover:text-zinc-200 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 w-full transition-colors"
         >
           <LogOut className="h-4 w-4 shrink-0" />
