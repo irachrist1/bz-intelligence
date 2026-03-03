@@ -11,6 +11,7 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "db:seed": "tsx lib/db/seed/index.ts",
+    "migrate:rtc": "tsx scripts/migrate-rtc-data.ts",
     "kb:ingest": "tsx scripts/ingest-document.ts",
     "kb:clear": "tsx scripts/ingest-document.ts --clear",
     "seed:news": "tsx scripts/seed-news.ts",

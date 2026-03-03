@@ -41,7 +41,7 @@ const GEMINI_DISPLAY_NAMES: Record<string, string> = {
 
 export function resolveModelInfo(): ModelInfo {
   const anthropicKey = process.env.ANTHROPIC_API_KEY || ''
-  if (anthropicKey.startsWith('sk-ant-api03-')) {
+  if (anthropicKey.startsWith('sk-ant-')) {
     return { provider: 'anthropic', model: 'claude-sonnet-4-6', displayName: 'Claude Sonnet 4.6' }
   }
   if (process.env.GOOGLE_GENERATIVE_AI_API_KEY) {
@@ -66,7 +66,7 @@ function getModel(override?: string): LanguageModel {
     const provider = ALLOWED_MODELS[override]
     const hasKey =
       provider === 'anthropic'
-        ? process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-api03-')
+        ? process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-')
         : !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
     if (hasKey) {
       return provider === 'anthropic' ? anthropic(override) : google(override)
@@ -152,6 +152,7 @@ export async function POST(req: NextRequest) {
       const results = await searchKnowledgeBase(params.query, {
         sectorFilter: params.sectorFilter,
         docType: params.docType,
+        includeEcosystem: mode === 'intelligence',
       })
       if (results.length === 0) {
         // Track knowledge base gaps — queries with no matching content

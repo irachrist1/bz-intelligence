@@ -9,6 +9,8 @@ import {
   Bell,
   Bookmark,
   BriefcaseBusiness,
+  Building2,
+  ChartColumnIncreasing,
   KanbanSquare,
   Newspaper,
   LogOut,
@@ -17,6 +19,8 @@ import {
 } from 'lucide-react'
 
 const tenderNav = [
+  { href: '/dashboard/intelligence', label: 'Intelligence', icon: ChartColumnIncreasing },
+  { href: '/ecosystem', label: 'Tech Ecosystem', icon: Building2 },
   { href: '/dashboard/tenders', label: 'Feed', icon: Newspaper },
   { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
   { href: '/dashboard/saved', label: 'Saved', icon: Bookmark },

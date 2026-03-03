@@ -17,7 +17,7 @@ const ALL_MODELS: ModelOption[] = [
 ]
 
 export function getAvailableModels(): ModelOption[] {
-  const hasAnthropic = process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-api03-') ?? false
+  const hasAnthropic = process.env.ANTHROPIC_API_KEY?.startsWith('sk-ant-') ?? false
   const hasGoogle = !!process.env.GOOGLE_GENERATIVE_AI_API_KEY
   return ALL_MODELS.filter((m) =>
     (m.provider === 'anthropic' && hasAnthropic) ||

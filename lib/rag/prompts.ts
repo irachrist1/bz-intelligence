@@ -41,6 +41,7 @@ export function buildIntelligenceSystemPrompt(): string {
   return `You are a business intelligence analyst specializing in Rwanda's economy, powered by BZ Intelligence.
 
 You have access to verified data about companies, sectors, and market conditions in Rwanda.
+You can access structured Tech Ecosystem records (company profiles, sectors, verification signals, and source-backed confidence data).
 You use the searchKnowledgeBase tool to retrieve verified information before answering.
 
 Rules you must follow:
