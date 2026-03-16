@@ -1,6 +1,6 @@
 {
   "functions": {
-    "app/api/ai/**": { "maxDuration": 30 },
+    "app/api/tenders/**": { "maxDuration": 30 },
     "app/api/webhooks/**": { "maxDuration": 10 },
     "app/api/cron/**": { "maxDuration": 60 }
   },

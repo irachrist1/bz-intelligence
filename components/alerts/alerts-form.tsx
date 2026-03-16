@@ -18,6 +18,7 @@ type AlertFormState = {
 export function AlertsForm({ initialState }: { initialState: AlertFormState }) {
   const [state, setState] = useState<AlertFormState>(initialState)
   const [pending, startTransition] = useTransition()
+  const [previewPending, startPreviewTransition] = useTransition()
 
   function setFlag(key: keyof AlertFormState) {
     setState((current) => ({ ...current, [key]: !current[key] }))
@@ -37,6 +38,33 @@ export function AlertsForm({ initialState }: { initialState: AlertFormState }) {
       }
 
       toast.success('Alert preferences saved.')
+    })
+  }
+
+  function sendPreview() {
+    startPreviewTransition(async () => {
+      const response = await fetch('/api/cron/weekly-digest/preview', {
+        method: 'POST',
+      })
+
+      const payload = await response.json().catch(() => null)
+
+      if (!response.ok) {
+        toast.error('Could not send the digest preview.')
+        return
+      }
+
+      if (payload?.sent > 0) {
+        toast.success('Weekly digest preview sent to your email.')
+        return
+      }
+
+      if (payload?.reason === 'email_not_configured') {
+        toast.info('Email sending is not configured in this environment yet.')
+        return
+      }
+
+      toast.info('No matching tenders from the past 7 days yet.')
     })
   }
 
@@ -87,6 +115,18 @@ export function AlertsForm({ initialState }: { initialState: AlertFormState }) {
             />
           </div>
         ))}
+      </div>
+
+      <div className="rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-5 space-y-3">
+        <div>
+          <p className="text-sm font-medium text-zinc-800 dark:text-zinc-200">Weekly digest preview</p>
+          <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+            Send yourself a copy of the Monday digest using tenders matched in the last 7 days.
+          </p>
+        </div>
+        <Button variant="outline" onClick={sendPreview} disabled={previewPending}>
+          {previewPending ? 'Sending preview...' : 'Send preview to my email'}
+        </Button>
       </div>
 
       <Button onClick={save} disabled={pending}>

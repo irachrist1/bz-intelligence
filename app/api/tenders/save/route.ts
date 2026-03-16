@@ -24,6 +24,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'Invalid action' }, { status: 400 })
   }
 
+  const now = new Date()
+
   if (action === 'save') {
     await db
       .insert(tenderSaves)
@@ -31,12 +33,13 @@ export async function POST(req: NextRequest) {
         orgId,
         tenderId,
         stage: 'watching',
+        updatedAt: now,
       })
       .onConflictDoUpdate({
         target: [tenderSaves.orgId, tenderSaves.tenderId],
         set: {
           stage: 'watching',
-          updatedAt: new Date(),
+          updatedAt: now,
         },
       })
   }
@@ -58,14 +61,21 @@ export async function POST(req: NextRequest) {
         orgId,
         tenderId,
         stage,
+        updatedAt: now,
       })
       .onConflictDoUpdate({
         target: [tenderSaves.orgId, tenderSaves.tenderId],
         set: {
           stage,
-          updatedAt: new Date(),
+          updatedAt: now,
         },
       })
+
+    revalidateTag('tenders', 'default')
+    revalidateTag('pipeline', 'default')
+    revalidateTag('saved', 'default')
+
+    return NextResponse.json({ ok: true, stage, updatedAt: now.toISOString() })
   }
 
   revalidateTag('tenders', 'default')

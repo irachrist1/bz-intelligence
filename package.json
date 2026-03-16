@@ -10,11 +10,9 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
-    "db:seed": "tsx lib/db/seed/index.ts",
-    "kb:ingest": "tsx scripts/ingest-document.ts",
-    "kb:clear": "tsx scripts/ingest-document.ts --clear",
-    "seed:news": "tsx scripts/seed-news.ts",
-    "seed:sources": "tsx scripts/seed-tender-sources.ts"
+    "seed:sources": "tsx scripts/seed-tender-sources.ts",
+    "seed:tenders": "tsx scripts/seed-tenders.ts",
+    "scrape:rppa": "tsx scripts/scrape-rppa.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.50",
@@ -59,6 +57,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cheerio": "^1.2.0",
     "drizzle-kit": "^0.31.9",
     "tailwindcss": "^4",
     "tsx": "^4.21.0",

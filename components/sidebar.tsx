@@ -21,7 +21,7 @@ const tenderNav = [
   { href: '/dashboard/pipeline', label: 'Pipeline', icon: KanbanSquare },
   { href: '/dashboard/saved', label: 'Saved', icon: Bookmark },
   { href: '/dashboard/alerts', label: 'Alerts', icon: Bell },
-  { href: '/dashboard/profile', label: 'Profile', icon: BriefcaseBusiness },
+  { href: '/dashboard/profile', label: 'Firm Profile', icon: BriefcaseBusiness },
   { href: '/dashboard/admin', label: 'Admin', icon: Settings2 },
 ]
 

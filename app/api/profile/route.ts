@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { getSession } from '@/lib/auth/server'
 import { db } from '@/lib/db'
-import { businessProfiles, firmProfiles } from '@/lib/db/schema'
-import { eq, and } from 'drizzle-orm'
+import { firmProfiles } from '@/lib/db/schema'
+import { eq } from 'drizzle-orm'
 
 function normalizeArray(value: unknown): string[] {
   return Array.isArray(value)
@@ -34,48 +34,22 @@ export async function GET() {
 
   const orgId = session.session.activeOrganizationId || session.user.id
 
-  try {
-    const [firmRow] = await db.select().from(firmProfiles).where(eq(firmProfiles.orgId, orgId)).limit(1)
-    if (firmRow) {
-      return NextResponse.json({
-        profile: {
-          firmName: firmRow.firmName ?? '',
-          legalEntityType: firmRow.legalEntityType ?? '',
-          serviceCategories: firmRow.serviceCategories ?? [],
-          sectors: firmRow.sectors ?? [],
-          contractSizeRange: contractRangeFromProfile(firmRow.contractSizeMinUsd, firmRow.contractSizeMaxUsd),
-          fundingSources: firmRow.fundingSources ?? [],
-          countries: firmRow.countries ?? [],
-          languages: firmRow.languages ?? [],
-          keywordsInclude: (firmRow.keywordsInclude ?? []).join(', '),
-          keywordsExclude: (firmRow.keywordsExclude ?? []).join(', '),
-        },
-      })
-    }
-  } catch {
-    // firm_profiles table may not be migrated yet; fallback below.
-  }
+  const [firmRow] = await db.select().from(firmProfiles).where(eq(firmProfiles.orgId, orgId)).limit(1)
 
-  const [legacyRow] = await db
-    .select()
-    .from(businessProfiles)
-    .where(and(eq(businessProfiles.orgId, orgId), eq(businessProfiles.userId, session.user.id)))
-    .limit(1)
-
-  if (!legacyRow) return NextResponse.json({ profile: null })
+  if (!firmRow) return NextResponse.json({ profile: null })
 
   return NextResponse.json({
     profile: {
-      firmName: legacyRow.bizName ?? '',
-      legalEntityType: legacyRow.bizType ?? '',
-      serviceCategories: [],
-      sectors: legacyRow.sector ? [legacyRow.sector, ...(legacyRow.subSector ?? [])] : [],
-      contractSizeRange: '',
-      fundingSources: [],
-      countries: legacyRow.operatesProvince ? ['Rwanda', 'Uganda'] : ['Rwanda'],
-      languages: ['English'],
-      keywordsInclude: '',
-      keywordsExclude: '',
+      firmName: firmRow.firmName ?? '',
+      legalEntityType: firmRow.legalEntityType ?? '',
+      serviceCategories: firmRow.serviceCategories ?? [],
+      sectors: firmRow.sectors ?? [],
+      contractSizeRange: contractRangeFromProfile(firmRow.contractSizeMinUsd, firmRow.contractSizeMaxUsd),
+      fundingSources: firmRow.fundingSources ?? [],
+      countries: firmRow.countries ?? [],
+      languages: firmRow.languages ?? [],
+      keywordsInclude: (firmRow.keywordsInclude ?? []).join(', '),
+      keywordsExclude: (firmRow.keywordsExclude ?? []).join(', '),
     },
   })
 }
@@ -104,63 +78,26 @@ export async function PUT(req: NextRequest) {
   const contractSizeRange = typeof body.contractSizeRange === 'string' ? body.contractSizeRange : ''
   const contractBounds = contractRangeBounds(contractSizeRange)
 
-  try {
-    const firmProfileData = {
-      firmName: firmName || null,
-      legalEntityType,
-      serviceCategories,
-      sectors,
-      contractSizeMinUsd: contractBounds.min,
-      contractSizeMaxUsd: contractBounds.max,
-      fundingSources,
-      countries,
-      languages,
-      keywordsInclude,
-      keywordsExclude,
-      updatedAt: now,
-    }
-
-    const [existingFirmProfile] = await db.select().from(firmProfiles).where(eq(firmProfiles.orgId, orgId)).limit(1)
-    if (!existingFirmProfile) {
-      await db.insert(firmProfiles).values({ orgId, ...firmProfileData })
-    } else {
-      await db
-        .update(firmProfiles)
-        .set(firmProfileData)
-        .where(eq(firmProfiles.id, existingFirmProfile.id))
-    }
-  } catch {
-    // Continue with legacy profile update for compatibility.
-  }
-
-  // Keep legacy profile populated for existing features.
-  const legacyData = {
-    bizName: firmName || null,
-    bizType: legalEntityType,
-    sector: sectors[0] || null,
-    subSector: sectors.slice(1),
-    operatesProvince: countries.some((country) => country !== 'Rwanda'),
+  const firmProfileData = {
+    firmName: firmName || null,
+    legalEntityType,
+    serviceCategories,
+    sectors,
+    contractSizeMinUsd: contractBounds.min,
+    contractSizeMaxUsd: contractBounds.max,
+    fundingSources,
+    countries,
+    languages,
+    keywordsInclude,
+    keywordsExclude,
     updatedAt: now,
   }
 
-  const [existingLegacy] = await db
-    .select()
-    .from(businessProfiles)
-    .where(and(eq(businessProfiles.orgId, orgId), eq(businessProfiles.userId, session.user.id)))
-    .limit(1)
-
-  if (!existingLegacy) {
-    await db.insert(businessProfiles).values({
-      orgId,
-      userId: session.user.id,
-      handlesMoney: false,
-      collectsData: false,
-      foreignOwnership: false,
-      transactionType: [],
-      ...legacyData,
-    })
+  const [existing] = await db.select().from(firmProfiles).where(eq(firmProfiles.orgId, orgId)).limit(1)
+  if (!existing) {
+    await db.insert(firmProfiles).values({ orgId, ...firmProfileData })
   } else {
-    await db.update(businessProfiles).set(legacyData).where(eq(businessProfiles.id, existingLegacy.id))
+    await db.update(firmProfiles).set(firmProfileData).where(eq(firmProfiles.id, existing.id))
   }
 
   return NextResponse.json({ ok: true })
