@@ -265,7 +265,7 @@ async function mapWithConcurrency<T, R>(
 async function collectSeedCandidates(targetCount: number): Promise<SeedTender[]> {
   const listingItems: ListTender[] = []
 
-  for (let page = 1; page <= MAX_PAGES && listingItems.length < targetCount * 2; page += 1) {
+  for (let page = 1; page <= MAX_PAGES; page += 1) {
     const html = await fetchHtml(buildListUrl(page))
     const pageItems = parseListPage(html).filter((item) => {
       const deadline = item.listingDeadline
@@ -293,6 +293,7 @@ async function collectSeedCandidates(targetCount: number): Promise<SeedTender[]>
   return detailed
     .filter((item): item is SeedTender => item !== null)
     .filter((item) => item.deadlineSubmission.getTime() > Date.now())
+    .filter((item) => item.estimatedValueRwf !== null)
     .slice(0, targetCount)
 }
 

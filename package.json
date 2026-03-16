@@ -11,7 +11,8 @@
     "db:studio": "drizzle-kit studio",
     "db:migrate": "drizzle-kit migrate",
     "seed:sources": "tsx scripts/seed-tender-sources.ts",
-    "seed:tenders": "tsx scripts/seed-tenders.ts"
+    "seed:tenders": "tsx scripts/seed-tenders.ts",
+    "scrape:rppa": "tsx scripts/scrape-rppa.ts"
   },
   "dependencies": {
     "@ai-sdk/anthropic": "^3.0.50",
