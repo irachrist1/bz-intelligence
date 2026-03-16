@@ -13,20 +13,20 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
   const orgId = session.session.activeOrganizationId || session.user.id
 
+  // Default true so a DB error fails open (user gets through rather than being blocked).
+  let hasProfile = true
   try {
     const rows = await db
       .select({ id: firmProfiles.id })
       .from(firmProfiles)
       .where(eq(firmProfiles.orgId, orgId))
       .limit(1)
-
-    if (rows.length === 0) {
-      redirect('/onboarding')
-    }
+    hasProfile = rows.length > 0
   } catch {
-    // DB error — fail open, let the user through rather than blocking everyone.
-    console.error('[dashboard/layout] Could not check firm profile — failing open')
+    console.error('[dashboard/layout] DB error checking firm profile — failing open')
   }
+
+  if (!hasProfile) redirect('/onboarding')
 
   return <>{children}</>
 }
