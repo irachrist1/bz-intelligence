@@ -99,6 +99,11 @@ Without real tenders the product is empty. Seed 20+ current, open RPPA tenders b
 | Stripe subscription billing | Not needed until paying users exist |
 | World Bank / UNGM / ADB scrapers | After RPPA scraper is validated |
 | Fit score stored in DB | Over-engineering; recompute on demand |
+| **Firm lookup in onboarding** | Wait until real users confirm friction is in practice-area selection, not elsewhere |
+| **Auto-scrape cron on Vercel** | Scraper currently runs manually on local machine — needs to become a Vercel cron job for hands-off operation |
+
+### Firm lookup detail (when ready to build)
+When user types firm name on Step 0 of onboarding, search the web (Tavily API ~$0.001/call) and parse results with Claude Haiku (~$0.001/call). If confident match found, show confirmation screen: "Is this your firm?" with description. If user confirms, pre-select practice areas + funding sources on subsequent steps. If no match or user says no, proceed with manual fill as today. Cost per onboarding: ~$0.003. Graceful degradation: skip confirmation screen entirely if search returns nothing. Build with Tavily API key (separate from Anthropic key).
 ---
 
 ## MVP Shipped — 2026-03-16
