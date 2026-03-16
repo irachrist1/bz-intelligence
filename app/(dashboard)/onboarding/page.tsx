@@ -1,75 +1,49 @@
 'use client'
 
 import { useState } from 'react'
-import { useRouter, useSearchParams } from 'next/navigation'
+import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Progress } from '@/components/ui/progress'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
 type Profile = {
   firmName: string
-  legalEntityType: string
   serviceCategories: string[]
-  sectors: string[]
   contractSizeRange: string
   fundingSources: string[]
-  countries: string[]
-  languages: string[]
   keywordsInclude: string
   keywordsExclude: string
 }
 
-const TOTAL_STEPS = 4
-
-const SERVICE_OPTIONS = [
-  'IT consulting',
+const PRACTICE_AREAS = [
   'Legal services',
   'Management consulting',
-  'Engineering',
-  'Audit',
-  'Training',
-  'Construction',
+  'IT consulting',
   'Financial advisory',
+  'Audit & assurance',
+  'Training & capacity building',
+  'Engineering',
+  'Research & evaluation',
+  'Policy advisory',
+  'Procurement advisory',
 ]
 
-const SECTOR_OPTIONS = [
-  'ICT',
-  'Public sector',
-  'Health',
-  'Education',
-  'Energy',
-  'Agriculture',
-  'Finance',
-  'Infrastructure',
-]
-
-const FUNDING_OPTIONS = [
-  'GoR',
+const FUNDING_SOURCES = [
+  'RPPA / GoR',
   'World Bank',
+  'UNGM',
   'AfDB',
-  'UN',
+  'UN agencies',
   'EU',
   'USAID',
-  'Bilateral',
   'All',
 ]
 
-const COUNTRY_OPTIONS = [
-  'Rwanda',
-  'Uganda',
-  'Kenya',
-  'Tanzania',
-  'Pan-Africa',
-]
-
-const LANGUAGE_OPTIONS = ['English', 'French', 'Kinyarwanda']
-
-function MultiSelectChips({
+function Chips({
   options,
   selected,
   onToggle,
@@ -88,10 +62,10 @@ function MultiSelectChips({
             type="button"
             onClick={() => onToggle(option)}
             className={[
-              'px-3 py-1.5 rounded-lg border text-xs transition-colors',
+              'px-3 py-1.5 rounded-lg border text-xs font-medium transition-colors',
               active
                 ? 'border-zinc-900 dark:border-zinc-200 bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900'
-                : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400',
+                : 'border-zinc-200 dark:border-zinc-700 text-zinc-600 dark:text-zinc-400 hover:border-zinc-400 dark:hover:border-zinc-500',
             ].join(' ')}
           >
             {option}
@@ -102,282 +76,230 @@ function MultiSelectChips({
   )
 }
 
+const TOTAL_STEPS = 3
+
 export default function OnboardingPage() {
   const router = useRouter()
-  const searchParams = useSearchParams()
   const [step, setStep] = useState(0)
-  const [loading, setLoading] = useState(false)
+  const [saving, setSaving] = useState(false)
   const [profile, setProfile] = useState<Profile>({
     firmName: '',
-    legalEntityType: '',
     serviceCategories: [],
-    sectors: [],
     contractSizeRange: '',
     fundingSources: [],
-    countries: ['Rwanda'],
-    languages: ['English'],
     keywordsInclude: '',
     keywordsExclude: '',
   })
 
   function update<K extends keyof Profile>(field: K, value: Profile[K]) {
-    setProfile((current) => ({ ...current, [field]: value }))
+    setProfile((p) => ({ ...p, [field]: value }))
   }
 
-  function toggleArray(field: 'serviceCategories' | 'sectors' | 'fundingSources' | 'countries' | 'languages', value: string) {
-    setProfile((current) => {
-      const next = current[field].includes(value)
-        ? current[field].filter((item) => item !== value)
-        : [...current[field], value]
-      return { ...current, [field]: next }
+  function toggle(field: 'serviceCategories' | 'fundingSources', value: string) {
+    setProfile((p) => {
+      const next = p[field].includes(value)
+        ? p[field].filter((v) => v !== value)
+        : [...p[field], value]
+      return { ...p, [field]: next }
     })
   }
 
-  async function finish() {
-    setLoading(true)
-
+  async function submit() {
+    setSaving(true)
     try {
       const res = await fetch('/api/onboarding', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(profile),
       })
-
-      if (!res.ok) throw new Error('Failed to save profile')
-
-      const requestedPath = searchParams.get('callbackUrl')
-      const destination = requestedPath && requestedPath.startsWith('/') ? requestedPath : '/dashboard/tenders'
-      router.push(destination)
+      if (!res.ok) throw new Error('Save failed')
+      router.push('/dashboard/tenders')
     } catch {
-      toast.error('Could not save your firm profile. Please try again.')
-      setLoading(false)
+      toast.error('Could not save your profile. Please try again.')
+      setSaving(false)
     }
   }
 
-  const progress = Math.round(((step + 1) / (TOTAL_STEPS + 1)) * 100)
+  const pct = Math.round(((step + 1) / (TOTAL_STEPS + 1)) * 100)
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg">
-        <div className="mb-6">
-          <div className="flex justify-between text-xs text-zinc-400 mb-2">
-            <span>Step {step + 1} of {TOTAL_STEPS + 1}</span>
-            <span className="text-zinc-500">Firm capability profile</span>
-          </div>
-          <Progress value={progress} className="h-1.5" />
+    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 bg-zinc-50 dark:bg-zinc-950">
+      <div className="w-full max-w-[480px]">
+
+        {/* Header */}
+        <div className="mb-8 text-center">
+          <p className="text-xs font-medium text-zinc-400 tracking-widest uppercase mb-2">BZ Intelligence</p>
+          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-100">Set up your firm profile</h1>
+          <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">Takes 2 minutes. Powers your tender feed and match scores.</p>
         </div>
 
-        <Card>
+        {/* Progress */}
+        <div className="flex items-center gap-3 mb-6">
+          {Array.from({ length: TOTAL_STEPS + 1 }).map((_, i) => (
+            <div
+              key={i}
+              className={[
+                'flex-1 h-1 rounded-full transition-colors',
+                i <= step
+                  ? 'bg-zinc-900 dark:bg-zinc-100'
+                  : 'bg-zinc-200 dark:bg-zinc-800',
+              ].join(' ')}
+            />
+          ))}
+        </div>
+
+        <Card className="border-zinc-200 dark:border-zinc-800 shadow-none">
+
+          {/* Step 0 — Firm name */}
           {step === 0 && (
             <>
-              <CardHeader>
-                <CardTitle>Set up your firm profile</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">What's your firm called?</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Firm name</Label>
+              <CardContent className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="firmName">Firm name</Label>
                   <Input
-                    placeholder="e.g. Kigali Digital Advisory Ltd"
+                    id="firmName"
+                    autoFocus
+                    placeholder="e.g. Kigali Advisory Partners Ltd"
                     value={profile.firmName}
                     onChange={(e) => update('firmName', e.target.value)}
+                    onKeyDown={(e) => { if (e.key === 'Enter' && profile.firmName.trim()) setStep(1) }}
                   />
                 </div>
-
-                <div>
-                  <Label>Legal entity type</Label>
-                  <Select value={profile.legalEntityType} onValueChange={(value) => update('legalEntityType', value)}>
-                    <SelectTrigger><SelectValue placeholder="Select legal entity type" /></SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="ltd">Private Limited Company (Ltd)</SelectItem>
-                      <SelectItem value="llp">Limited Liability Partnership (LLP)</SelectItem>
-                      <SelectItem value="ngo">NGO / Non-profit</SelectItem>
-                      <SelectItem value="branch">Branch of Foreign Company</SelectItem>
-                      <SelectItem value="sole_prop">Sole Proprietorship</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button
-                    onClick={() => setStep(1)}
-                    className="flex-1"
-                    disabled={!profile.firmName || !profile.legalEntityType}
-                  >
-                    Next
-                  </Button>
-                </div>
+                <Button
+                  onClick={() => setStep(1)}
+                  disabled={!profile.firmName.trim()}
+                  className="w-full"
+                >
+                  Continue
+                </Button>
               </CardContent>
             </>
           )}
 
+          {/* Step 1 — Practice areas */}
           {step === 1 && (
             <>
-              <CardHeader>
-                <CardTitle>What work does your firm do?</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">What does your firm do?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div>
-                  <Label>Service categories</Label>
-                  <p className="text-xs text-zinc-500 mb-2">Select all that apply.</p>
-                  <MultiSelectChips
-                    options={SERVICE_OPTIONS}
+                <div className="space-y-2">
+                  <Label>Practice areas</Label>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Select all that apply.</p>
+                  <Chips
+                    options={PRACTICE_AREAS}
                     selected={profile.serviceCategories}
-                    onToggle={(value) => toggleArray('serviceCategories', value)}
+                    onToggle={(v) => toggle('serviceCategories', v)}
                   />
                 </div>
-
-                <div>
-                  <Label>Sectors you primarily work in</Label>
-                  <p className="text-xs text-zinc-500 mb-2">Select all that apply.</p>
-                  <MultiSelectChips
-                    options={SECTOR_OPTIONS}
-                    selected={profile.sectors}
-                    onToggle={(value) => toggleArray('sectors', value)}
-                  />
-                </div>
-
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(0)} className="flex-1">Back</Button>
                   <Button
                     onClick={() => setStep(2)}
+                    disabled={profile.serviceCategories.length === 0}
                     className="flex-1"
-                    disabled={profile.serviceCategories.length === 0 || profile.sectors.length === 0}
                   >
-                    Next
+                    Continue
                   </Button>
                 </div>
               </CardContent>
             </>
           )}
 
+          {/* Step 2 — Targeting */}
           {step === 2 && (
             <>
-              <CardHeader>
-                <CardTitle>Target profile</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">What are you looking for?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div>
+                <div className="space-y-1.5">
                   <Label>Typical contract size</Label>
-                  <Select value={profile.contractSizeRange} onValueChange={(value) => update('contractSizeRange', value)}>
-                    <SelectTrigger><SelectValue placeholder="Select typical contract size range" /></SelectTrigger>
+                  <Select value={profile.contractSizeRange} onValueChange={(v) => update('contractSizeRange', v)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a range" />
+                    </SelectTrigger>
                     <SelectContent>
                       <SelectItem value="lt_50k">Below $50K</SelectItem>
-                      <SelectItem value="50k_250k">$50K - $250K</SelectItem>
-                      <SelectItem value="250k_1m">$250K - $1M</SelectItem>
+                      <SelectItem value="50k_250k">$50K – $250K</SelectItem>
+                      <SelectItem value="250k_1m">$250K – $1M</SelectItem>
                       <SelectItem value="gt_1m">Above $1M</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
-                  <Label>Funding sources you target</Label>
-                  <p className="text-xs text-zinc-500 mb-2">Select all that apply.</p>
-                  <MultiSelectChips
-                    options={FUNDING_OPTIONS}
+                <div className="space-y-2">
+                  <Label>Funding sources</Label>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Select the sources you want to track.</p>
+                  <Chips
+                    options={FUNDING_SOURCES}
                     selected={profile.fundingSources}
-                    onToggle={(value) => toggleArray('fundingSources', value)}
+                    onToggle={(v) => toggle('fundingSources', v)}
                   />
                 </div>
 
-                <div>
-                  <Label>Countries you operate in</Label>
-                  <p className="text-xs text-zinc-500 mb-2">Select all that apply.</p>
-                  <MultiSelectChips
-                    options={COUNTRY_OPTIONS}
-                    selected={profile.countries}
-                    onToggle={(value) => toggleArray('countries', value)}
-                  />
-                </div>
-
-                <div>
-                  <Label>Proposal languages</Label>
-                  <p className="text-xs text-zinc-500 mb-2">Select all that apply.</p>
-                  <MultiSelectChips
-                    options={LANGUAGE_OPTIONS}
-                    selected={profile.languages}
-                    onToggle={(value) => toggleArray('languages', value)}
-                  />
-                </div>
-
-                <div className="flex gap-2 pt-2">
+                <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(1)} className="flex-1">Back</Button>
                   <Button
                     onClick={() => setStep(3)}
+                    disabled={!profile.contractSizeRange || profile.fundingSources.length === 0}
                     className="flex-1"
-                    disabled={!profile.contractSizeRange || profile.fundingSources.length === 0 || profile.countries.length === 0}
                   >
-                    Next
+                    Continue
                   </Button>
                 </div>
               </CardContent>
             </>
           )}
 
+          {/* Step 3 — Keywords + submit */}
           {step === 3 && (
             <>
-              <CardHeader>
-                <CardTitle>Matching rules</CardTitle>
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base font-semibold">Fine-tune your matching</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <Label>Keywords we should always watch for</Label>
+              <CardContent className="space-y-5">
+                <div className="space-y-1.5">
+                  <Label htmlFor="kw-include">Keywords to always watch for</Label>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Comma-separated. Optional.</p>
                   <Textarea
-                    placeholder="e.g. cybersecurity, enterprise architecture, cloud migration"
+                    id="kw-include"
+                    placeholder="e.g. data governance, enterprise architecture"
                     value={profile.keywordsInclude}
                     onChange={(e) => update('keywordsInclude', e.target.value)}
-                    className="min-h-[90px] resize-none"
+                    className="min-h-[80px] resize-none"
                   />
                 </div>
 
-                <div>
-                  <Label>Keywords that disqualify tenders</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="kw-exclude">Keywords that disqualify a tender</Label>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Comma-separated. Optional.</p>
                   <Textarea
-                    placeholder="e.g. civil works, roads, heavy construction"
+                    id="kw-exclude"
+                    placeholder="e.g. civil works, road construction"
                     value={profile.keywordsExclude}
                     onChange={(e) => update('keywordsExclude', e.target.value)}
-                    className="min-h-[90px] resize-none"
+                    className="min-h-[80px] resize-none"
                   />
-                </div>
-
-                <div className="flex gap-2 pt-2">
-                  <Button variant="outline" onClick={() => setStep(2)} className="flex-1">Back</Button>
-                  <Button onClick={() => setStep(4)} className="flex-1">Review</Button>
-                </div>
-              </CardContent>
-            </>
-          )}
-
-          {step === 4 && (
-            <>
-              <CardHeader>
-                <CardTitle>Profile ready</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="rounded-lg border border-zinc-200 dark:border-zinc-800 p-4 text-sm text-zinc-600 dark:text-zinc-400 space-y-1">
-                  <p>
-                    Firm: <span className="font-medium text-zinc-900 dark:text-zinc-100">{profile.firmName}</span>
-                  </p>
-                  <p>
-                    Services: <span className="font-medium text-zinc-900 dark:text-zinc-100">{profile.serviceCategories.join(', ')}</span>
-                  </p>
-                  <p>
-                    Sectors: <span className="font-medium text-zinc-900 dark:text-zinc-100">{profile.sectors.join(', ')}</span>
-                  </p>
-                  <p>
-                    Target size: <span className="font-medium text-zinc-900 dark:text-zinc-100">{profile.contractSizeRange}</span>
-                  </p>
                 </div>
 
                 <div className="flex gap-2">
-                  <Button variant="outline" onClick={() => setStep(3)} className="flex-1">Back</Button>
-                  <Button onClick={finish} disabled={loading} className="flex-1">
-                    {loading ? 'Saving profile...' : 'Open tender feed'}
+                  <Button variant="outline" onClick={() => setStep(2)} className="flex-1">Back</Button>
+                  <Button onClick={submit} disabled={saving} className="flex-1">
+                    {saving ? 'Saving...' : 'Open tender feed →'}
                   </Button>
                 </div>
               </CardContent>
             </>
           )}
         </Card>
+
+        <p className="text-center text-xs text-zinc-400 dark:text-zinc-500 mt-5">
+          You can update this any time from your profile settings.
+        </p>
       </div>
     </div>
   )
