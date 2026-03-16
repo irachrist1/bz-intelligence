@@ -103,7 +103,9 @@ Without real tenders the product is empty. Seed 20+ current, open RPPA tenders b
 
 ## MVP Shipped — 2026-03-16
 
-**What is live on branch `wip/resume-2026-03-03`:**
+**v0.1.0 shipped — 2026-03-16**
+
+**What is live on `main`:**
 
 - Tender feed with admin ingest + approve flow
 - Pipeline tracker (watching → go → in_prep → submitted → won/lost) with inline drag-and-drop stage moves
