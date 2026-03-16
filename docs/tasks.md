@@ -14,6 +14,8 @@ Sprint 1 goal: Working product a real firm can evaluate. No scrapers. Manual dat
 The core value prop. Tells a firm "this tender is X% relevant to you, here's why."
 Model: `claude-haiku-4-5-20251001` · API: `POST https://api.anthropic.com/v1/messages`
 
+> **Blocker to activate:** Replace `ANTHROPIC_API_KEY` in `.env.local` with a real REST key (`sk-ant-api...`) from console.anthropic.com. Current key is a Claude Code OAuth token and is rejected by the REST API.
+
 | # | Task | Size | Status | Assigned |
 |---|------|------|--------|----------|
 | A1 | Create `app/api/tenders/[id]/fit-score/route.ts` — GET endpoint. Reads tender + firmProfile, calls Haiku, returns `{status,score,reasons,gaps}`. Never 500s. | M | done | Claude Code |
@@ -48,7 +50,7 @@ Without real tenders the product is empty. Seed 20+ current, open RPPA tenders b
 
 | # | Task | Size | Status | Assigned |
 |---|------|------|--------|----------|
-| E1 | RPPA tender scraper — standalone script `scripts/scrape-rppa.ts` (`npm run scrape:rppa`) | L | todo | Codex |
+| E1 | RPPA tender scraper — standalone script `scripts/scrape-rppa.ts` (`npm run scrape:rppa`) | L | done | Codex |
 | E2 | Tender seed script — `scripts/seed-tenders.ts` seeds 20+ real RPPA tenders (`npm run seed:tenders`) | M | done | Codex |
 | E3 | Pipeline tracker UI polish — move tenders between stages from pipeline board, show timestamps | M | done | Codex |
 | E4 | Weekly digest email — wire cron to send formatted weekly digest to each subscribed firm | M | done | Codex |
