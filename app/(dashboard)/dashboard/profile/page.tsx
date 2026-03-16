@@ -5,14 +5,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
 type Profile = {
   firmName: string
   serviceCategories: string[]
-  contractSizeRange: string
   fundingSources: string[]
   keywordsInclude: string
   keywordsExclude: string
@@ -21,7 +19,6 @@ type Profile = {
 const DEFAULT_PROFILE: Profile = {
   firmName: '',
   serviceCategories: [],
-  contractSizeRange: '',
   fundingSources: [],
   keywordsInclude: '',
   keywordsExclude: '',
@@ -219,20 +216,6 @@ export default function ProfilePage() {
             <CardTitle className="text-base font-semibold">Targeting</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
-            <div className="space-y-1.5">
-              <Label>Typical contract size</Label>
-              <Select value={profile.contractSizeRange} onValueChange={(v) => update('contractSizeRange', v)}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a range" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="lt_50k">Below $50K</SelectItem>
-                  <SelectItem value="50k_250k">$50K – $250K</SelectItem>
-                  <SelectItem value="250k_1m">$250K – $1M</SelectItem>
-                  <SelectItem value="gt_1m">Above $1M</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
             <div className="space-y-2">
               <Label>Funding sources</Label>
               <p className="text-xs text-zinc-500 dark:text-zinc-400">Select all that apply.</p>

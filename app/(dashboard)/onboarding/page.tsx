@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { toast } from 'sonner'
 
 type Profile = {
   firmName: string
   serviceCategories: string[]
-  contractSizeRange: string
   fundingSources: string[]
   keywordsInclude: string
   keywordsExclude: string
@@ -102,7 +100,6 @@ export default function OnboardingPage() {
   const [profile, setProfile] = useState<Profile>({
     firmName: '',
     serviceCategories: [],
-    contractSizeRange: '',
     fundingSources: [],
     keywordsInclude: '',
     keywordsExclude: '',
@@ -136,8 +133,6 @@ export default function OnboardingPage() {
       setSaving(false)
     }
   }
-
-  const pct = Math.round(((step + 1) / (TOTAL_STEPS + 1)) * 100)
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-4 py-16 bg-zinc-50 dark:bg-zinc-950">
@@ -226,43 +221,26 @@ export default function OnboardingPage() {
             </>
           )}
 
-          {/* Step 2 — Targeting */}
+          {/* Step 2 — Funding sources */}
           {step === 2 && (
             <>
               <CardHeader className="pb-4">
-                <CardTitle className="text-base font-semibold">What are you looking for?</CardTitle>
+                <CardTitle className="text-base font-semibold">Which funding sources do you track?</CardTitle>
               </CardHeader>
               <CardContent className="space-y-5">
-                <div className="space-y-1.5">
-                  <Label>Typical contract size</Label>
-                  <Select value={profile.contractSizeRange} onValueChange={(v) => update('contractSizeRange', v)}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a range" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="lt_50k">Below $50K</SelectItem>
-                      <SelectItem value="50k_250k">$50K – $250K</SelectItem>
-                      <SelectItem value="250k_1m">$250K – $1M</SelectItem>
-                      <SelectItem value="gt_1m">Above $1M</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
                 <div className="space-y-2">
-                  <Label>Funding sources</Label>
-                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Select the sources you want to track.</p>
+                  <p className="text-xs text-zinc-500 dark:text-zinc-400">Select all that apply.</p>
                   <Chips
                     options={FUNDING_SOURCES}
                     selected={profile.fundingSources}
                     onToggle={(v) => toggle('fundingSources', v)}
                   />
                 </div>
-
                 <div className="flex gap-2">
                   <Button variant="outline" onClick={() => setStep(1)} className="flex-1">Back</Button>
                   <Button
                     onClick={() => setStep(3)}
-                    disabled={!profile.contractSizeRange || profile.fundingSources.length === 0}
+                    disabled={profile.fundingSources.length === 0}
                     className="flex-1"
                   >
                     Continue
@@ -284,7 +262,7 @@ export default function OnboardingPage() {
                   <p className="text-xs text-zinc-500 dark:text-zinc-400">Comma-separated. Optional.</p>
                   <Textarea
                     id="kw-include"
-                    placeholder="e.g. data governance, enterprise architecture"
+                    placeholder="e.g. transfer pricing, tax audit"
                     value={profile.keywordsInclude}
                     onChange={(e) => update('keywordsInclude', e.target.value)}
                     className="min-h-[80px] resize-none"

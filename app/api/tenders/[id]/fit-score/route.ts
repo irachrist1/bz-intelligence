@@ -22,14 +22,6 @@ type FitScoreResult =
   | { status: 'no_profile' }
   | { status: 'error' }
 
-function contractRangeLabel(min: number | null, max: number | null): string {
-  if (min === null && max === 50000) return 'Below $50K'
-  if (min === 50000 && max === 250000) return '$50K–$250K'
-  if (min === 250000 && max === 1000000) return '$250K–$1M'
-  if (min === 1000000 && max === null) return 'Above $1M'
-  return 'Not specified'
-}
-
 function cap(text: string | null | undefined, maxLen: number): string {
   if (!text) return ''
   return text.length > maxLen ? text.slice(0, maxLen) + '…' : text
@@ -62,9 +54,6 @@ export async function GET(
     }).from(tenders).where(eq(tenders.id, id)).limit(1),
     db.select({
       serviceCategories: firmProfiles.serviceCategories,
-      sectors: firmProfiles.sectors,
-      contractSizeMinUsd: firmProfiles.contractSizeMinUsd,
-      contractSizeMaxUsd: firmProfiles.contractSizeMaxUsd,
       fundingSources: firmProfiles.fundingSources,
       countries: firmProfiles.countries,
       keywordsInclude: firmProfiles.keywordsInclude,
@@ -101,7 +90,6 @@ export async function GET(
 
   const profileContext = [
     serviceCategories.length > 0 ? `Service categories: ${serviceCategories.join(', ')}` : null,
-    `Typical contract size: ${contractRangeLabel(profile.contractSizeMinUsd, profile.contractSizeMaxUsd)}`,
     fundingSources.length > 0 ? `Preferred funding sources: ${fundingSources.join(', ')}` : null,
     countries.length > 0 ? `Countries: ${countries.join(', ')}` : null,
     keywordsInclude.length > 0 ? `Must-include keywords: ${cap(keywordsInclude.join(', '), 200)}` : null,
@@ -115,7 +103,7 @@ export async function GET(
 Given a tender opportunity and a firm profile, score the fit from 0 to 100 and explain the key factors — both what aligns and what doesn't.
 
 Rules:
-- Score based on how well the firm's service categories, contract size range, and funding source preferences match the tender's actual requirements.
+- Score based on how well the firm's service categories and funding source preferences match the tender's actual requirements.
 - If the tender involves work outside the firm's stated services (e.g. civil engineering, construction, agriculture, road works), score below 40.
 - If the tender is a strong match to the firm's core services, score above 70.
 - reasons: 2-3 specific factors that most influenced the score — could be positive or negative. Name the specific service, skill, or requirement. Not generic phrases like "relevant experience needed."
