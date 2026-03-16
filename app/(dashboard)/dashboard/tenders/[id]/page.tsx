@@ -7,6 +7,7 @@ import { db } from '@/lib/db'
 import { getSession } from '@/lib/auth/server'
 import { tenderSaves, tenders } from '@/lib/db/schema'
 import { TenderDetailActions } from '@/components/tenders/tender-detail-actions'
+import { FitScoreCard } from '@/components/tenders/fit-score-card'
 
 type TenderDetails = {
   id: string
@@ -176,6 +177,10 @@ export default async function TenderDetailPage({ params }: PageProps) {
               {item.eligibilityNotes || 'Eligibility extraction not yet available for this tender.'}
             </p>
           </section>
+
+          <div className="mb-6">
+            <FitScoreCard tenderId={item.id} />
+          </div>
 
           {item.categoryTags && item.categoryTags.length > 0 && (
             <section className="mb-6">
