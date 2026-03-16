@@ -93,31 +93,38 @@ export async function GET(
     typeof tender.estimatedValueUsd === 'number' ? `Estimated value: $${tender.estimatedValueUsd.toLocaleString()}` : null,
   ].filter(Boolean).join('\n')
 
+  const serviceCategories = (profile.serviceCategories ?? []).filter(Boolean)
+  const fundingSources = (profile.fundingSources ?? []).filter(Boolean)
+  const countries = (profile.countries ?? []).filter(Boolean)
+  const keywordsInclude = (profile.keywordsInclude ?? []).filter(Boolean)
+  const keywordsExclude = (profile.keywordsExclude ?? []).filter(Boolean)
+
   const profileContext = [
-    `Service categories: ${(profile.serviceCategories ?? []).join(', ') || 'Not specified'}`,
-    `Sectors: ${(profile.sectors ?? []).join(', ') || 'Not specified'}`,
+    serviceCategories.length > 0 ? `Service categories: ${serviceCategories.join(', ')}` : null,
     `Typical contract size: ${contractRangeLabel(profile.contractSizeMinUsd, profile.contractSizeMaxUsd)}`,
-    `Preferred funding sources: ${(profile.fundingSources ?? []).join(', ') || 'Any'}`,
-    `Countries: ${(profile.countries ?? []).join(', ') || 'Not specified'}`,
-    (profile.keywordsInclude ?? []).length > 0
-      ? `Must-include keywords: ${cap((profile.keywordsInclude ?? []).join(', '), 200)}`
-      : null,
-    (profile.keywordsExclude ?? []).length > 0
-      ? `Disqualifying keywords: ${cap((profile.keywordsExclude ?? []).join(', '), 200)}`
-      : null,
+    fundingSources.length > 0 ? `Preferred funding sources: ${fundingSources.join(', ')}` : null,
+    countries.length > 0 ? `Countries: ${countries.join(', ')}` : null,
+    keywordsInclude.length > 0 ? `Must-include keywords: ${cap(keywordsInclude.join(', '), 200)}` : null,
+    keywordsExclude.length > 0 ? `Disqualifying keywords: ${cap(keywordsExclude.join(', '), 200)}` : null,
   ].filter(Boolean).join('\n')
 
-  const userMessage = `TENDER:\n${tenderContext}\n\nFIRM PROFILE:\n${profileContext}\n\nEvaluate how well this firm's capabilities match this tender and return the JSON fit evaluation.`
+  const userMessage = `TENDER:\n${tenderContext}\n\nFIRM PROFILE:\n${profileContext}\n\nScore this tender's fit for the firm and return the JSON evaluation.`
 
   const systemPrompt = `You are a procurement matching analyst for a business intelligence platform serving law and consulting firms in Rwanda and East Africa.
 
-Given a tender opportunity and a firm's profile, evaluate fit with precision. Consider: service category alignment, sector relevance, contract size fit, funding source preference, and any keyword matches or disqualifications.
+Given a tender opportunity and a firm profile, score the fit from 0 to 100 and explain the key factors — both what aligns and what doesn't.
 
-Respond ONLY with valid JSON matching this exact schema — no prose, no markdown, no explanation outside the JSON:
-{"score": <integer 0-100>, "reasons": [<2-3 short strings explaining why it's a good match>], "gaps": [<0-2 short strings flagging specific eligibility concerns or mismatches>]}
+Rules:
+- Score based on how well the firm's service categories, contract size range, and funding source preferences match the tender's actual requirements.
+- If the tender involves work outside the firm's stated services (e.g. civil engineering, construction, agriculture, road works), score below 40.
+- If the tender is a strong match to the firm's core services, score above 70.
+- reasons: 2-3 specific factors that most influenced the score — could be positive or negative. Name the specific service, skill, or requirement. Not generic phrases like "relevant experience needed."
+- gaps: 0-2 concrete eligibility concerns or disqualifying mismatches. Leave empty array if no meaningful gaps.
 
-Score guide: 80-100 = strong fit, 60-79 = moderate fit, 40-59 = weak fit, 0-39 = poor fit.
-Keep each reason and gap under 15 words. Be specific, not generic.`
+Respond ONLY with valid JSON — no prose, no markdown, no explanation outside the JSON:
+{"score": <integer 0-100>, "reasons": ["...", "...", "..."], "gaps": ["...", "..."]}
+
+Keep each reason/gap under 15 words. Score 80-100 = strong fit, 60-79 = moderate, 40-59 = weak, 0-39 = poor.`
 
   try {
     const response = await fetch(ANTHROPIC_URL, {
