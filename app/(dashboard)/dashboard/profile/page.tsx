@@ -28,16 +28,33 @@ const DEFAULT_PROFILE: Profile = {
 }
 
 const PRACTICE_AREAS = [
+  // Tax & advisory (Andersen Tax Services)
+  'Tax compliance & strategy',
+  'Tax advisory',
+  'Transfer pricing',
+  'International tax',
+  // Legal & corporate (Andersen Corporate & Legal Support)
   'Legal services',
+  'Corporate & commercial law',
+  'Regulatory & compliance',
+  // Advisory & consulting (Andersen Advisory)
   'Management consulting',
-  'IT consulting',
   'Financial advisory',
+  'Strategy & growth advisory',
+  'Risk management & governance',
+  // Assurance & finance
   'Audit & assurance',
+  'Finance & accounting support',
+  // People & operations (Andersen Business Support)
+  'HR & people advisory',
+  // Technology
+  'IT & technology consulting',
+  // Other
   'Training & capacity building',
-  'Engineering',
   'Research & evaluation',
   'Policy advisory',
   'Procurement advisory',
+  'Engineering',
 ]
 
 const FUNDING_SOURCES = [
