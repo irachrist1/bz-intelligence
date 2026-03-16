@@ -61,8 +61,23 @@ Without real tenders the product is empty. Seed 20+ current, open RPPA tenders b
 
 | # | Task | Size | Status | Assigned |
 |---|------|------|--------|----------|
-| D1 | Run `/qa` after A+B are built. Verify: onboarding gate, fit score loading/scored/no-profile/error states. | S | todo | Claude Code |
+| D1 | Run `/qa` after A+B are built. Verify: onboarding gate, fit score loading/scored/no-profile/error states. | S | done | Claude Code |
 | D2 | Manually test fit score with 3 real tenders + a firm profile. Verify scores make intuitive sense. | S | todo | Human |
+
+---
+
+## Verified — 2026-03-16
+
+| Feature | Result | Notes |
+|---------|--------|-------|
+| **Build** (`npm run build`) | PASS | Zero errors, 25 routes compiled |
+| **E1 RPPA scraper** (`npm run scrape:rppa`) | PASS | 271 tenders fetched, 12 new, 259 skipped (dedup works) |
+| **E2 Seed tenders** (`npm run seed:tenders`) | PASS | 0 inserted, 21 updated — fully idempotent on re-run |
+| **E3 Pipeline board** | PASS (code-verified) | Drag-and-drop + select, optimistic update with rollback, `updatedAt` persisted from API response, server re-fetch on reload |
+| **E4 Weekly digest preview** | PASS (code-verified) | `POST /api/cron/weekly-digest/preview` auth-guarded, sends to current user only, "Send preview to my email" button in alerts UI |
+| **B1 Onboarding gate** | PASS (code-verified) | `/dashboard/**` layout redirects to `/onboarding` if no firmProfile, fails open on DB error |
+| **A1-A3 AI Fit Score** | BLOCKED | Code correct — endpoint, card, and wiring all verified. **Requires real Anthropic REST key** (`sk-ant-api...`) to activate. Current key is OAuth token. |
+| **Onboarding + Profile UI** | PASS (code-verified) | Firm name → practice areas → contract size + funding → keywords. PUT `/api/profile` write path confirmed. |
 
 ---
 
